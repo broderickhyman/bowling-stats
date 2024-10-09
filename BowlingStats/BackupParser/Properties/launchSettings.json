@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "BackupParser": {
+      "commandName": "Project",
+      "commandLineArgs": "-p ../../../../../backup.pinpal"
+    }
+  }
+}
