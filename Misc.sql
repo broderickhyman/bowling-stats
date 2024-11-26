@@ -52,15 +52,17 @@ and DATETIME(w.date, 'unixepoch') > '2024-09-01'
 -- and pins = 0
 -- and f.frameNum < g.frame
 -- and f.frameNum >= 10
+-- and f.frameNum <= 10 -- Regular frames
 -- and f.scores <> 0
 -- and f.scores = 0
-and f.flags & 1
--- and f.flags & 2
+and f.flags & 1 -- Bowled frame
+and f.flags & 2 -- Whether 2 balls were thrown
 
 -- and f.scores & 15 = 10 -- Strike
-and f.scores & 15 = 9 -- 9 pins
-and f.scores >> 4 = 10 -- Finished with all pins down
+-- and f.scores & 15 = 9 -- 9 pins
+-- and f.scores >> 4 = 10 -- Finished with all pins down
 -- and f.scores >> 4 < 10 -- Not finished with all pins down
+and f.scores & 15 < 10 -- Potential spare
 
 order by w.date desc
 , g.pk
