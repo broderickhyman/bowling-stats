@@ -13,7 +13,8 @@ inner join (
 	, count(*) as _cnt
 	from game g
 	inner join frame f on f.gameFk = g.pk
-	where f.scores & 170 = 170
+-- 	where f.scores & 170 = 170
+	where f.scores & 15 = 10
 	group by g.weekFk
 ) as strikes on strikes.weekFk = w.pk
 inner join (

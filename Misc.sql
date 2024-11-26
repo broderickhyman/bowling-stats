@@ -36,7 +36,7 @@ l.name
 , case when f.scores & 64 then 1 else 0 end as [scores7]
 , case when f.scores & 128 then 1 else 0 end as [scores8]
 -- , f.scores
-, f.scores & 160 = 160
+, f.scores >> 4
 
 from league l
 inner join week w on w.leagueFk = l.pk
@@ -44,7 +44,7 @@ inner join game g on g.weekFk = w.pk
 inner join frame f on f.gameFk = g.pk
 
 where 1=1
-and DATETIME(w.date, 'unixepoch') > '2021-01-01'
+-- and DATETIME(w.date, 'unixepoch') > '2021-01-01'
 and DATETIME(w.date, 'unixepoch') > '2024-09-01'
 -- and l.name = 'Suburban 2024'
 -- and w.pk = '222'
@@ -55,13 +55,12 @@ and DATETIME(w.date, 'unixepoch') > '2024-09-01'
 -- and f.scores <> 0
 -- and f.scores = 0
 and f.flags & 1
--- and f.flags & 64 <> 64 -- 7
--- and f.flags & 128 = 128 -- 8
 -- and f.flags & 2
 
--- and f.scores & 170 = 170 -- Strike
--- and f.scores & 160 = 160 -- Finished with all pins down
-and f.scores & 160 <> 160 -- Not finished with all pins down
+-- and f.scores & 15 = 10 -- Strike
+and f.scores & 15 = 9 -- 9 pins
+and f.scores >> 4 = 10 -- Finished with all pins down
+-- and f.scores >> 4 < 10 -- Not finished with all pins down
 
 order by w.date desc
 , g.pk
