@@ -35,11 +35,64 @@ w.date
 ;
 
 SELECT
-DATETIME(w.date, 'unixepoch') as 'Date'
-, g.score
-from week w
+l.name as 'League'
+, DATETIME(w.date, 'unixepoch') as 'Date'
+, sum(g.score) as 'Series'
+FROM league l
+inner join week w on w.leagueFk = l.pk
 inner join game g on g.weekFk = w.pk
 
+where w.leagueFk > 0
+
+group by
+l.name
+, w.pk
+
+having count(g.score) = 3
+
 order by w.date desc
-, g.pk
+;
+
+SELECT
+l.name as 'League'
+, DATETIME(w.date, 'unixepoch') as 'Date'
+-- , weekBest.score as 'Max'
+, best.score as 'Current Best'
+FROM league l
+inner join week w on w.leagueFk = l.pk
+inner join (
+	SELECT
+	w2.pk
+	, sum(g2.score) as 'score'
+	from week w2
+	inner join game g2 on g2.weekFk = w2.pk
+	where w2.leagueFk > 0
+	group by
+	w2.pk
+) weekBest on weekBest.pk = w.pk
+inner join (
+	SELECT
+	w2.pk
+	, max(series.score) as 'score'
+	from week w2
+	inner join week w3 on w3.date <= w2.date
+	inner join (
+		select
+		w3.pk
+		, sum(g2.score) as 'score'
+		from week w3
+		inner join game g2 on g2.weekFk = w3.pk
+		group by
+		w3.pk
+	) series on series.pk = w3.pk
+	where w2.leagueFk > 0
+	and w3.leagueFk > 0
+	group by
+	w2.pk
+) best on best.pk = w.pk
+
+where weekBest.score = best.score
+
+ORDER BY
+w.date
 ;
