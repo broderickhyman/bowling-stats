@@ -33,3 +33,13 @@ where weekBest.score = best.score
 ORDER BY
 w.date
 ;
+
+SELECT
+DATETIME(w.date, 'unixepoch') as 'Date'
+, g.score
+from week w
+inner join game g on g.weekFk = w.pk
+
+order by w.date desc
+, g.pk
+;

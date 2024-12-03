@@ -1,6 +1,6 @@
 SELECT
 l.name
-, DATETIME(w.date, 'unixepoch') as _date
+, DATETIME(w.date, 'unixepoch') as 'Date'
 , g.pk
 
 -- , w.*
