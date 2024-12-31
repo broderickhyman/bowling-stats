@@ -6,13 +6,13 @@ STRFTIME('%Y-%m', DATETIME(w.date, 'unixepoch')) as 'Date'
 , ROUND(CAST(SUM(pickedUpSpares._cnt) as float) / SUM(potentialSpares._cnt), 2) as pickedUpSpares
 , ROUND(CAST(SUM(pickedUpsinglePinSpares._cnt) as float) / SUM(singlePinSpares._cnt), 2) as pickedUpSinglePins
 , SUM(gutters._cnt) as 'Gutters'
-, SUM(strikes._cnt)
-, SUM(allFrames._cnt)
-, SUM(opens._cnt)
-, SUM(pickedUpSpares._cnt)
-, SUM(potentialSpares._cnt)
-, SUM(pickedUpsinglePinSpares._cnt)
-, SUM(singlePinSpares._cnt)
+-- , SUM(strikes._cnt)
+-- , SUM(allFrames._cnt)
+-- , SUM(opens._cnt)
+-- , SUM(pickedUpSpares._cnt)
+-- , SUM(potentialSpares._cnt)
+-- , SUM(pickedUpsinglePinSpares._cnt)
+-- , SUM(singlePinSpares._cnt)
 from league l
 inner join week w on w.leagueFk = l.pk
 

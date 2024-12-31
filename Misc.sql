@@ -64,10 +64,12 @@ and f.scores & 15 = 0 and f.frameNum < 11 -- Gutter
 -- and f.scores >> 4 = 0 -- Double gutter
 -- and f.scores >> 4 = 10 -- Finished with all pins down
 -- and f.scores >> 4 < 10 -- Not finished with all pins down
-and f.scores & 15 < 10 -- Potential spare
+-- and f.scores & 15 < 10 -- Potential spare
 
 order by w.date desc
 , g.pk
 , f.frameNum
+
+-- order by f.frameNum
 
 -- order by f.scores
