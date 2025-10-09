@@ -1,6 +1,6 @@
 SELECT
 l.name
-, DATETIME(w.date, 'unixepoch') as 'Date'
+, STRFTIME('%m/%d/%Y', DATETIME(w.date, 'unixepoch')) as 'Date'
 , ROUND(averageScore._avg, 2) as averageScore
 , ROUND(CAST(strikes._cnt as float) / allFrames._cnt, 2) as percentStrikes
 , ROUND(CAST(pickedUpSpares._cnt as float) / potentialSpares._cnt, 2) as pickedUpSpares

@@ -1,7 +1,7 @@
 SELECT
 l.name as 'League'
-, DATETIME(min(w.date), 'unixepoch') as 'Start Date'
-, DATETIME(max(w.date), 'unixepoch') as 'End Date'
+, STRFTIME('%m/%d/%Y', DATETIME(min(w.date), 'unixepoch')) as 'Start Date'
+, STRFTIME('%m/%d/%Y', DATETIME(max(w.date), 'unixepoch')) as 'End Date'
 , ROUND(avg(g.score), 2) as 'Average'
 , SUM(gutters._cnt) as 'Gutters'
 , count(g.pk) as 'Games'

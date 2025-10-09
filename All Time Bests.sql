@@ -1,6 +1,6 @@
 SELECT
 l.name as 'League'
-, DATETIME(w.date, 'unixepoch') as 'Date'
+, STRFTIME('%m/%d/%Y', DATETIME(w.date, 'unixepoch')) as 'Date'
 -- , weekBest.score as 'Max'
 , best.score as 'Current Best'
 FROM league l
@@ -36,7 +36,7 @@ w.date
 
 SELECT
 l.name as 'League'
-, DATETIME(w.date, 'unixepoch') as 'Date'
+, STRFTIME('%m/%d/%Y', DATETIME(w.date, 'unixepoch')) as 'Date'
 -- , weekBest.score as 'Max'
 , best.score as 'Current Best'
 FROM league l

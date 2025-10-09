@@ -1,6 +1,6 @@
 SELECT
 l.name as 'League'
-, DATETIME(w.date, 'unixepoch') as 'Date'
+, STRFTIME('%m/%d/%Y', DATETIME(w.date, 'unixepoch')) as 'Date'
 , sum(g.score) as 'Series'
 FROM league l
 inner join week w on w.leagueFk = l.pk
