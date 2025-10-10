@@ -23,7 +23,7 @@ inner join game g on g.weekFk = w.pk
 
 where 1=1
 -- and DATETIME(w.date, 'unixepoch') > '2021-01-01'
-and DATETIME(w.date, 'unixepoch') > '2024-09-01'
+and DATETIME(w.date, 'unixepoch') > '2025-09-01'
 
 order by w.date desc
 , g.pk

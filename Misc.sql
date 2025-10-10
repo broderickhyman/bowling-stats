@@ -60,11 +60,12 @@ and f.flags & 1 -- Bowled frame
 
 -- and f.scores & 15 = 10 -- Strike
 -- and f.scores & 15 = 9 -- 9 pins
-and f.scores & 15 = 0 and f.frameNum < 11 -- Gutter
+-- and f.scores & 15 = 0 and f.frameNum < 11 -- Gutter
 -- and f.scores >> 4 = 0 -- Double gutter
 -- and f.scores >> 4 = 10 -- Finished with all pins down
 -- and f.scores >> 4 < 10 -- Not finished with all pins down
 -- and f.scores & 15 < 10 -- Potential spare
+and f.pins >> 6 > 0 and f.pins & 0x3F = 0 -- Pocket hit without strike
 
 order by w.date desc
 , g.pk
