@@ -1,12 +1,17 @@
 SELECT
-l.name
+l.name as 'Name'
 , STRFTIME('%m/%d/%Y', DATETIME(w.date, 'unixepoch')) as 'Date'
-, ROUND(averageScore._avg, 2) as averageScore
-, ROUND(CAST(strikes._cnt as float) / allFrames._cnt, 2) as percentStrikes
-, ROUND(CAST(pickedUpSpares._cnt as float) / potentialSpares._cnt, 2) as pickedUpSpares
-, ROUND(CAST(pickedUpsinglePinSpares._cnt as float) / singlePinSpares._cnt, 2) as pickedUpSinglePins
+, ROUND(averageScore._avg, 2) as 'Average Score'
+, FORMAT('%2.0f%%', CAST(strikes._cnt as float) / allFrames._cnt * 100) as 'Strikes'
+, FORMAT('%2.0f%%', CAST((strikes._cnt + IFNULL(pocketHitsNoStrike._cnt, 0)) as float) / allFrames._cnt * 100) as 'Pocket Hits'
+, FORMAT('%2.0f%%', CAST(pickedUpSpares._cnt as float) / potentialSpares._cnt * 100) as 'Spares'
+, FORMAT('%2.0f%%', CAST(pickedUpsinglePinSpares._cnt as float) / singlePinSpares._cnt * 100) as 'Single Pin Pickup'
+, strikes._cnt as 'Strikes'
+-- , allFrames._cnt as 'Frame Count'
 -- , potentialSpares._cnt
 -- , pickedUpSpares._cnt
+, IFNULL(pocketHitsNoStrike._cnt, 0) as 'Pocket Hits No Strike'
+-- , framesWithPins._cnt as 'Pin Frames'
 from league l
 inner join week w on w.leagueFk = l.pk
 inner join (
@@ -15,7 +20,7 @@ inner join (
 	, count(*) as _cnt
 	from game g
 	inner join frame f on f.gameFk = g.pk
-	where f.pins = 0
+	where f.scores & 15 = 10 -- Strike
 	group by g.weekFk
 ) as strikes on strikes.weekFk = w.pk
 inner join (
@@ -27,6 +32,15 @@ inner join (
 	where f.scores <> 0
 	group by g.weekFk
 ) as allFrames on allFrames.weekFk = w.pk
+-- inner join (
+-- 	SELECT
+-- 	g.weekFk
+-- 	, count(*) as _cnt
+-- 	from game g
+-- 	inner join frame f on f.gameFk = g.pk
+-- 	where f.flags & 64 = 64 -- Pins were recorded (not score based)
+-- 	group by g.weekFk
+-- ) as framesWithPins on framesWithPins.weekFk = w.pk
 inner join (
 	SELECT
 	g.weekFk
@@ -69,6 +83,15 @@ inner join (
 	and f.flags & 2 -- Whether 2 balls were thrown
 	group by g.weekFk
 ) as singlePinSpares on singlePinSpares.weekFk = w.pk
+left join (
+	SELECT
+	g.weekFk
+	, count(*) as _cnt
+	from game g
+	inner join frame f on f.gameFk = g.pk
+	where f.pins >> 6 > 0 and f.pins & 0x3F = 0 -- Pocket hit without strike
+	group by g.weekFk
+) as pocketHitsNoStrike on pocketHitsNoStrike.weekFk = w.pk
 inner join (
 	SELECT
 	g.weekFk

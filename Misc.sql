@@ -65,7 +65,8 @@ and f.flags & 1 -- Bowled frame
 -- and f.scores >> 4 = 10 -- Finished with all pins down
 -- and f.scores >> 4 < 10 -- Not finished with all pins down
 -- and f.scores & 15 < 10 -- Potential spare
-and f.pins >> 6 > 0 and f.pins & 0x3F = 0 -- Pocket hit without strike
+-- and f.pins >> 6 > 0 and f.pins & 0x3F = 0 -- Pocket hit without strike
+and f.flags & 64 = 0 -- Pins were not recorded
 
 order by w.date desc
 , g.pk
