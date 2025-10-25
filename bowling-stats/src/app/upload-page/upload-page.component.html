@@ -1,7 +1,10 @@
 <div>
   <input type="file" accept=".pinpal" (change)="onFileSelected($event)" />
   <div>{{ status() }}</div>
-  @for (date of dates(); track date) {
-    <div>{{ date.toDateString() }}</div>
+  @for (week of weeks(); track week) {
+    <div>{{ week.date.toLocaleDateString() }}</div>
+    @for (game of week.games; track game) {
+      <div>{{ game.score }}</div>
+    }
   }
 </div>

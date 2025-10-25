@@ -26,6 +26,8 @@ export class PinpalService {
     if (file) {
       statusUpdate.set('Found existing database');
       await this.loadData(statusUpdate, file.data);
+    } else {
+      statusUpdate.set('No existing database');
     }
   }
 

@@ -1,4 +1,5 @@
 import { Component, Input, inject, signal } from '@angular/core';
+import { Week } from '@core/services/pinpal.model';
 import { PinpalService } from '@core/services/pinpal.service';
 
 @Component({
@@ -8,7 +9,7 @@ import { PinpalService } from '@core/services/pinpal.service';
 export class UploadPage {
   private pinpalService = inject(PinpalService);
   status = signal('Loading...');
-  dates = signal<Date[]>([]);
+  weeks = signal<Week[]>([]);
 
   async ngOnInit() {
     try {
@@ -36,9 +37,31 @@ export class UploadPage {
   }
 
   async loadData() {
-    const sql = this.pinpalService.sqlDB!;
-    const result = sql.exec('select date from week order by date desc limit 10')[0];
-    const dates = result.values.map((val) => new Date((val[0] as number) * 1000));
-    this.dates.set(dates);
+    const sql = this.pinpalService.sqlDB;
+    if (!sql) {
+      return;
+    }
+    const result = sql.exec(`select
+w.date
+, w.pk
+, g.score
+from week w
+inner join game g on g.weekFk = w.pk
+order by w.date desc limit 30;`)[0];
+    const weeks = new Map<number, Week>();
+    result.values.reduce((acc, val) => {
+      const weekId = val[1] as number;
+      if (!acc.has(weekId)) {
+        acc.set(weekId, {
+          date: new Date((val[0] as number) * 1000),
+          games: [],
+        });
+      }
+      acc.get(weekId)?.games.push({
+        score: val[2] as number,
+      });
+      return acc;
+    }, weeks);
+    this.weeks.set([...weeks.values()]);
   }
 }
