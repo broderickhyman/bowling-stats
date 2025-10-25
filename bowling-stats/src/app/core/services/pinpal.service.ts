@@ -1,6 +1,6 @@
 import { Injectable, WritableSignal, inject } from '@angular/core';
 import initSqlJs, { Database } from 'sql.js';
-import { AppDB } from './db-service';
+import { AppDB } from './db.service';
 
 @Injectable({
   providedIn: 'root',

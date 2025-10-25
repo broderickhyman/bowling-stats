@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { PinpalService } from './pinpal-service';
+import { PinpalService } from './pinpal.service';
 
 describe('PinpalService', () => {
   let service: PinpalService;

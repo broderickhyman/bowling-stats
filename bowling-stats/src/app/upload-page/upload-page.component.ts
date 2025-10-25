@@ -1,5 +1,5 @@
 import { Component, Input, inject, signal } from '@angular/core';
-import { PinpalService } from '@core/services/pinpal-service';
+import { PinpalService } from '@core/services/pinpal.service';
 
 @Component({
   selector: 'upload-page',
