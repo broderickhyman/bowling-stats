@@ -1,11 +1,15 @@
-import { Injectable } from '@angular/core';
-import initSqlJs from 'sql.js';
+import { Injectable, WritableSignal, inject } from '@angular/core';
+import initSqlJs, { Database } from 'sql.js';
+import { AppDB } from './db-service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PinpalService {
   private SQL: initSqlJs.SqlJsStatic | undefined;
+  private appDB = inject(AppDB);
+  private sqlDB: Database | undefined;
+  public loaded = false;
 
   async initialize() {
     if (!this.SQL) {
@@ -15,18 +19,40 @@ export class PinpalService {
     }
   }
 
-  async importDatabase(file: File): Promise<void> {
-    await this.initialize();
+  async loadExisting(statusUpdate: WritableSignal<string>) {
+    const file = await this.appDB.databaseFiles.get({
+      title: 'main',
+    });
+    if (file) {
+      statusUpdate.set('Found existing database');
+      await this.loadData(statusUpdate, file.data);
+    }
+  }
 
+  private async loadData(statusUpdate: WritableSignal<string>, data: Uint8Array) {
+    await this.initialize();
+    if (this.sqlDB) {
+      this.sqlDB.close();
+    }
+    this.sqlDB = new this.SQL!.Database(data);
+    this.loaded = true;
+    statusUpdate.set('Database loaded');
+  }
+
+  async importDatabase(statusUpdate: WritableSignal<string>, file: File): Promise<void> {
+    statusUpdate.set('Importing file');
     const arrayBuffer = await file.arrayBuffer();
     const rawData = new Uint8Array(arrayBuffer);
-    console.log(rawData);
     const startPosition = this.findStartPosition(rawData);
     if (startPosition < 0) {
       throw new Error('Could not find the SQLite start');
     }
-    const sqliteData = rawData.subarray(startPosition);
-    console.log(sqliteData);
+    const sqliteData = rawData.subarray(startPosition + 1);
+    this.appDB.databaseFiles.put({
+      title: 'main',
+      data: sqliteData,
+    });
+    await this.loadData(statusUpdate, sqliteData);
   }
 
   findStartPosition(rawData: Uint8Array): number {
