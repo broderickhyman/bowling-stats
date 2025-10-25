@@ -1,2 +1,7 @@
-<input type="file" accept=".pinpal" (change)="onFileSelected($event)" />
-<div>{{ status() }}</div>
+<div>
+  <input type="file" accept=".pinpal" (change)="onFileSelected($event)" />
+  <div>{{ status() }}</div>
+  @for (date of dates(); track date) {
+    <div>{{ date.toDateString() }}</div>
+  }
+</div>

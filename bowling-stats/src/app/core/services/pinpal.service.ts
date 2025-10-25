@@ -8,7 +8,7 @@ import { AppDB } from './db.service';
 export class PinpalService {
   private SQL: initSqlJs.SqlJsStatic | undefined;
   private appDB = inject(AppDB);
-  private sqlDB: Database | undefined;
+  public sqlDB: Database | undefined;
   public loaded = false;
 
   async initialize() {
