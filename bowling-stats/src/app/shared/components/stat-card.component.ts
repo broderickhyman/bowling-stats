@@ -1,3 +1,4 @@
+import { DecimalPipe } from '@angular/common';
 import { Component, input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 
@@ -5,9 +6,9 @@ import { MatCardModule } from '@angular/material/card';
   selector: 'stat-card',
   templateUrl: './stat-card.component.html',
   styleUrl: './stat-card.component.scss',
-  imports: [MatCardModule],
+  imports: [MatCardModule, DecimalPipe],
 })
 export class StatCard {
-  value = input.required<number>();
   displayText = input.required<string>();
+  value = input.required<number>();
 }

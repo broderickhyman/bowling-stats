@@ -3,7 +3,17 @@
 } @else {
   <div class="mat-headline-medium">Overview</div>
   <div class="mat-title-medium">Last {{ games().length }} league games</div>
-  <stat-card [displayText]="'Average'" [value]="180" />
+  @if (stats) {
+    <stat-card [displayText]="'Average'" [value]="stats.average" />
+    <stat-card [displayText]="'High Score'" [value]="stats.high" />
+    <stat-card [displayText]="'Count'" [value]="stats.count" />
+  }
   <div class="mat-headline-medium">Score</div>
-  <canvas baseChart [data]="chartData" [options]="chartOptions" [type]="'line'"></canvas>
+  <canvas
+    class="score-chart"
+    baseChart
+    [data]="chartData"
+    [options]="chartOptions"
+    [type]="'line'"
+  ></canvas>
 }

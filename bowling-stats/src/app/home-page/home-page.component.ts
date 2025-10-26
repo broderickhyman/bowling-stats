@@ -3,6 +3,7 @@ import { MatCardModule } from '@angular/material/card';
 import { Game } from '@core/services/pinpal.model';
 import { PinpalService } from '@core/services/pinpal.service';
 import { StatCard } from 'app/shared/components/stat-card.component';
+import { Stats } from 'app/shared/components/stats.model';
 import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -16,6 +17,7 @@ export class HomePage {
   private pinpalService = inject(PinpalService);
   loading = signal(true);
   games = signal<Game[]>([]);
+  stats?: Stats;
   chartData: ChartConfiguration['data'] = {
     datasets: [
       {
@@ -59,7 +61,7 @@ export class HomePage {
     if (!sql) {
       return;
     }
-    const result = sql.exec(`SELECT
+    const gamesResult = sql.exec(`SELECT
 g.score
 , w.date
 , g.pk
@@ -70,7 +72,7 @@ order by
 w.date desc
 , g.pk
 limit 30;`)[0];
-    const games = result.values
+    const games = gamesResult.values
       .map<Game>((v) => ({
         pk: v[2] as number,
         score: v[0] as number,
@@ -88,6 +90,23 @@ limit 30;`)[0];
     this.games.set(games);
     this.chartData.datasets[0].data = games.map((g) => g.score);
     this.chartData.labels = games.map((g) => g.week!.date.toLocaleDateString());
+
+    const placeholders = games.map(() => '?').join(',');
+    const query = `SELECT
+avg(g.score)
+, max(g.score)
+, count(g.score)
+from game g
+where g.pk in (${placeholders})`;
+    const statResult = sql.exec(
+      query,
+      games.map((g) => g.pk),
+    )[0].values[0];
+    this.stats = {
+      average: statResult[0] as number,
+      high: statResult[1] as number,
+      count: statResult[2] as number,
+    };
     this.loading.set(false);
   }
 }
