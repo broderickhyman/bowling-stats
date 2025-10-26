@@ -10,6 +10,7 @@ export class PinpalService {
   private appDB = inject(AppDB);
   public sqlDB: Database | undefined;
   public loaded = false;
+  public status = '';
 
   async initialize() {
     if (!this.SQL) {
@@ -17,28 +18,30 @@ export class PinpalService {
         locateFile: (file) => `assets/sql-wasm/${file}`,
       });
     }
+    await this.loadExisting();
   }
 
-  async loadExisting(statusUpdate: WritableSignal<string>) {
+  async loadExisting() {
+    if (this.loaded) {
+      return;
+    }
     const file = await this.appDB.databaseFiles.get({
       title: 'main',
     });
     if (file) {
-      statusUpdate.set('Found existing database');
-      await this.loadData(statusUpdate, file.data);
+      this.status = 'Found existing database';
+      await this.loadData(file.data);
     } else {
-      statusUpdate.set('No existing database');
+      this.status = 'No database found';
     }
   }
 
-  private async loadData(statusUpdate: WritableSignal<string>, data: Uint8Array) {
-    await this.initialize();
+  private async loadData(data: Uint8Array) {
     if (this.sqlDB) {
       this.sqlDB.close();
     }
     this.sqlDB = new this.SQL!.Database(data);
     this.loaded = true;
-    statusUpdate.set('Database loaded');
   }
 
   async importDatabase(statusUpdate: WritableSignal<string>, file: File): Promise<void> {
@@ -54,7 +57,8 @@ export class PinpalService {
       title: 'main',
       data: sqliteData,
     });
-    await this.loadData(statusUpdate, sqliteData);
+    await this.loadData(sqliteData);
+    statusUpdate.set('Database loaded');
   }
 
   findStartPosition(rawData: Uint8Array): number {

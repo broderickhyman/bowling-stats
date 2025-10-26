@@ -1,23 +1,30 @@
 import { Component, Input, inject, signal } from '@angular/core';
-import { Week } from '@core/services/pinpal.model';
+import { MatListModule } from '@angular/material/list';
 import { PinpalService } from '@core/services/pinpal.service';
+import { Week } from '@core/services/pinpal.model';
 
 @Component({
   selector: 'upload-page',
   templateUrl: './upload-page.component.html',
+  imports: [MatListModule],
 })
 export class UploadPage {
   private pinpalService = inject(PinpalService);
   status = signal('Loading...');
   weeks = signal<Week[]>([]);
 
+  gameScores(week: Week): string {
+    return week.games.map((g) => g.score).join(', ');
+  }
+
   async ngOnInit() {
     try {
-      await this.pinpalService.loadExisting(this.status);
+      await this.pinpalService.initialize();
     } catch (error) {
       console.error('Load existing failed:', error);
       alert('Failed to load existing');
     }
+    this.status.set(this.pinpalService.status);
     await this.loadData();
   }
 
@@ -41,13 +48,22 @@ export class UploadPage {
     if (!sql) {
       return;
     }
-    const result = sql.exec(`select
+    const result = sql.exec(`SELECT
 w.date
 , w.pk
 , g.score
 from week w
+inner join (
+	SELECT
+	w.pk
+	from week w
+	order by w.date desc
+	limit 4
+) as sub on sub.pk = w.pk
 inner join game g on g.weekFk = w.pk
-order by w.date desc limit 30;`)[0];
+order by
+w.date desc
+, g.pk;`)[0];
     const weeks = new Map<number, Week>();
     result.values.reduce((acc, val) => {
       const weekId = val[1] as number;
