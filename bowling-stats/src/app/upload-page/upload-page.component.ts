@@ -52,6 +52,7 @@ export class UploadPage {
 w.date
 , w.pk
 , g.score
+, g.pk
 from week w
 inner join (
 	SELECT
@@ -75,6 +76,7 @@ w.date desc
       }
       acc.get(weekId)?.games.push({
         score: val[2] as number,
+        pk: val[3] as number,
       });
       return acc;
     }, weeks);

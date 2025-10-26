@@ -1,0 +1,7 @@
+mat-card.stat-card {
+  display: inline-flex;
+
+  .mat-mdc-card-title {
+    color: var(--mat-sys-primary);
+  }
+}

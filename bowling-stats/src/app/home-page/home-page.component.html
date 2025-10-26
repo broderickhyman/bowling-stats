@@ -1,3 +1,9 @@
-<div>
-  <h2>Welcome to Bowling Stats</h2>
-</div>
+@if (loading()) {
+  <div>Loading...</div>
+} @else {
+  <div class="mat-headline-medium">Overview</div>
+  <div class="mat-title-medium">Last {{ games().length }} league games</div>
+  <stat-card [displayText]="'Average'" [value]="180" />
+  <div class="mat-headline-medium">Score</div>
+  <canvas baseChart [data]="chartData" [options]="chartOptions" [type]="'line'"></canvas>
+}

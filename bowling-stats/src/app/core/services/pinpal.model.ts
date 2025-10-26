@@ -4,5 +4,7 @@ export interface Week {
 }
 
 export interface Game {
+  pk: number;
+  week?: Week;
   score: number;
 }
