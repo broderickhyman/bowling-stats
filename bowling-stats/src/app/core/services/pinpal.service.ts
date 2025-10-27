@@ -18,6 +18,7 @@ export class PinpalService {
   public sqlDB: Database | undefined;
   public loaded = false;
   public status = '';
+  private splits: number[] = [];
 
   async initialize() {
     if (!this.SQL) {
@@ -48,6 +49,7 @@ export class PinpalService {
       this.sqlDB.close();
     }
     this.sqlDB = new this.SQL!.Database(data);
+    this.calculateSplits();
     this.loaded = true;
   }
 
@@ -88,5 +90,17 @@ export class PinpalService {
     }
 
     return -1;
+  }
+
+  calculateSplits() {
+    for (var i = 0; i < 1024; i++) {
+      if (i & 1) {
+        // Head pin
+        continue;
+      }
+      this.splits.push(i);
+    }
+
+    this.splits.forEach((v) => console.log(v.toString(2)));
   }
 }
