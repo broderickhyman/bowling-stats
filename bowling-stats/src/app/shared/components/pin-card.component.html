@@ -1,0 +1,6 @@
+<svg>
+  @for (pin of pinData; track pin){
+  <circle [attr.cx]="pin.x" [attr.cy]="pin.y" r="10" [attr.fill]="pin.fill" />
+  }
+  <!-- <circle cx="10" cy="10" r="10" fill="gray" /> -->
+</svg>

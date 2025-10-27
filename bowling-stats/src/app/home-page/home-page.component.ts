@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { Game } from '@core/services/pinpal.model';
 import { PinpalService } from '@core/services/pinpal.service';
+import { PinCard } from 'app/shared/components/pin-card.component';
 import { StatCard } from 'app/shared/components/stat-card.component';
 import { Stats } from 'app/shared/components/stats.model';
 import { ChartConfiguration } from 'chart.js';
@@ -11,7 +12,7 @@ import { BaseChartDirective } from 'ng2-charts';
   selector: 'home-page',
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.scss',
-  imports: [BaseChartDirective, MatCardModule, StatCard],
+  imports: [BaseChartDirective, MatCardModule, StatCard, PinCard],
 })
 export class HomePage {
   private pinpalService = inject(PinpalService);
