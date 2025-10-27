@@ -93,14 +93,64 @@ export class PinpalService {
   }
 
   calculateSplits() {
-    for (var i = 0; i < 1024; i++) {
-      if (i & 1) {
+    const adjacency = [
+      [2, 3],
+      [1, 4, 5],
+      [1, 5, 6],
+      [2, 7, 8],
+      [2, 3, 8, 9],
+      [3, 9, 10],
+      [4],
+      [4, 5],
+      [5, 6],
+      [6],
+    ];
+    for (var pinCombo = 1; pinCombo < 1024; pinCombo++) {
+      // for (var pinCombo = 1; pinCombo < 16; pinCombo++) {
+      if (pinCombo & 1) {
         // Head pin
         continue;
+      } else if (
+        pinCombo == 2 ||
+        pinCombo == 4 ||
+        pinCombo == 8 ||
+        pinCombo == 16 ||
+        pinCombo == 32 ||
+        pinCombo == 64 ||
+        pinCombo == 128 ||
+        pinCombo == 256 ||
+        pinCombo == 512
+      ) {
+        // Single pin
+        continue;
       }
-      this.splits.push(i);
+      // console.log('  ' + pinCombo.toString(2).padStart(10, '0'));
+      // Starting at 1 to skip the head pin
+      let bitOffset = 1;
+      let split = false;
+      while (bitOffset < 10) {
+        const pinValue = (pinCombo >> bitOffset) & 1;
+        if (pinValue == 0) {
+          bitOffset++;
+          continue;
+        }
+        // console.log(bitOffset);
+        const connectedPins = adjacency[bitOffset];
+        // console.log(connectedPins);
+        const foundPin = connectedPins.some((cp) => ((pinCombo >> (cp - 1)) & 1) == 1);
+        if (!foundPin) {
+          split = true;
+          // console.log('Split');
+          break;
+        }
+        bitOffset++;
+      }
+      if (split) {
+        this.splits.push(pinCombo);
+      }
     }
 
-    this.splits.forEach((v) => console.log(v.toString(2)));
+    this.splits.forEach((v) => console.log(v.toString(2).padStart(10, '0')));
+    console.log(this.splits.length);
   }
 }
