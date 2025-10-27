@@ -1,12 +1,19 @@
 import { Injectable, WritableSignal, inject } from '@angular/core';
-import initSqlJs, { Database } from 'sql.js';
+import type { Database, SqlJsStatic } from 'sql.js';
 import { AppDB } from './db.service';
+
+// Declare global initSqlJs function loaded from script
+declare global {
+  interface Window {
+    initSqlJs?: (config?: { locateFile: (file: string) => string }) => Promise<SqlJsStatic>;
+  }
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class PinpalService {
-  private SQL: initSqlJs.SqlJsStatic | undefined;
+  private SQL: SqlJsStatic | undefined;
   private appDB = inject(AppDB);
   public sqlDB: Database | undefined;
   public loaded = false;
@@ -14,8 +21,8 @@ export class PinpalService {
 
   async initialize() {
     if (!this.SQL) {
-      this.SQL = await initSqlJs({
-        locateFile: (file) => `assets/sql-wasm/${file}`,
+      this.SQL = await window.initSqlJs!({
+        locateFile: (file: string) => `assets/sql-wasm/${file}`,
       });
     }
     await this.loadExisting();

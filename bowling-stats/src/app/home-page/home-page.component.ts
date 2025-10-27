@@ -73,7 +73,7 @@ w.date desc
 , g.pk
 limit 30;`)[0];
     const games = gamesResult.values
-      .map<Game>((v) => ({
+      .map((v: any): Game => ({
         pk: v[2] as number,
         score: v[0] as number,
         week: {
@@ -81,15 +81,15 @@ limit 30;`)[0];
           games: [],
         },
       }))
-      .sort((a, b) => {
+      .sort((a: Game, b: Game) => {
         if (a.week?.date == b.week?.date) {
           return a.pk - b.pk;
         }
         return a.week!.date.getTime() - b.week!.date.getTime();
       });
     this.games.set(games);
-    this.chartData.datasets[0].data = games.map((g) => g.score);
-    this.chartData.labels = games.map((g) => g.week!.date.toLocaleDateString());
+    this.chartData.datasets[0].data = games.map((g: Game) => g.score);
+    this.chartData.labels = games.map((g: Game) => g.week!.date.toLocaleDateString());
 
     const placeholders = games.map(() => '?').join(',');
     const query = `SELECT
@@ -100,7 +100,7 @@ from game g
 where g.pk in (${placeholders})`;
     const statResult = sql.exec(
       query,
-      games.map((g) => g.pk),
+      games.map((g: Game) => g.pk),
     )[0].values[0];
     this.stats = {
       average: statResult[0] as number,

@@ -66,7 +66,7 @@ order by
 w.date desc
 , g.pk;`)[0];
     const weeks = new Map<number, Week>();
-    result.values.reduce((acc, val) => {
+    result.values.reduce((acc: Map<number, Week>, val: any) => {
       const weekId = val[1] as number;
       if (!acc.has(weekId)) {
         acc.set(weekId, {
