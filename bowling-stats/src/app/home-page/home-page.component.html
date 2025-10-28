@@ -16,6 +16,10 @@
     [options]="chartOptions"
     [type]="'line'"
   ></canvas>
-  <pin-card [value]="10" />
-  <pin-card [value]="11" />
+  @for (pinCombo of pinpalService.pinCombos; track pinCombo) {
+  <pin-card [value]="pinCombo.value" />
+  <br/>
+    <div>{{pinCombo.type}}</div>
+    <br/>
+  }
 }

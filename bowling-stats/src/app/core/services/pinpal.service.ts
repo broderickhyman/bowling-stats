@@ -18,7 +18,8 @@ export class PinpalService {
   public sqlDB: Database | undefined;
   public loaded = false;
   public status = '';
-  private splits: number[] = [];
+  private splits: PinCombo[] = [];
+  public pinCombos: PinCombo[] = [];
 
   async initialize() {
     if (!this.SQL) {
@@ -105,21 +106,21 @@ export class PinpalService {
       [5, 6],
       [6],
     ];
-    for (var pinCombo = 1; pinCombo < 1024; pinCombo++) {
+    for (var pinComboNumber = 1; pinComboNumber < 1024; pinComboNumber++) {
       // for (var pinCombo = 1; pinCombo < 16; pinCombo++) {
-      if (pinCombo & 1) {
+      if (pinComboNumber & 1) {
         // Head pin
         continue;
       } else if (
-        pinCombo == 2 ||
-        pinCombo == 4 ||
-        pinCombo == 8 ||
-        pinCombo == 16 ||
-        pinCombo == 32 ||
-        pinCombo == 64 ||
-        pinCombo == 128 ||
-        pinCombo == 256 ||
-        pinCombo == 512
+        pinComboNumber == 2 ||
+        pinComboNumber == 4 ||
+        pinComboNumber == 8 ||
+        pinComboNumber == 16 ||
+        pinComboNumber == 32 ||
+        pinComboNumber == 64 ||
+        pinComboNumber == 128 ||
+        pinComboNumber == 256 ||
+        pinComboNumber == 512
       ) {
         // Single pin
         continue;
@@ -129,7 +130,7 @@ export class PinpalService {
       let bitOffset = 1;
       let split = false;
       while (bitOffset < 10) {
-        const pinValue = (pinCombo >> bitOffset) & 1;
+        const pinValue = (pinComboNumber >> bitOffset) & 1;
         if (pinValue == 0) {
           bitOffset++;
           continue;
@@ -137,7 +138,7 @@ export class PinpalService {
         // console.log(bitOffset);
         const connectedPins = adjacency[bitOffset];
         // console.log(connectedPins);
-        const foundPin = connectedPins.some((cp) => ((pinCombo >> (cp - 1)) & 1) == 1);
+        const foundPin = connectedPins.some((cp) => ((pinComboNumber >> (cp - 1)) & 1) == 1);
         if (!foundPin) {
           split = true;
           // console.log('Split');
@@ -145,12 +146,24 @@ export class PinpalService {
         }
         bitOffset++;
       }
+const pinCombo: PinCombo = {
+        type: split ? 'split' : 'regular',
+        value: pinComboNumber
+      };
+      this.pinCombos.push(pinCombo);
       if (split) {
         this.splits.push(pinCombo);
       }
     }
 
-    this.splits.forEach((v) => console.log(v.toString(2).padStart(10, '0')));
+    this.splits.forEach((v) => console.log(v.value.toString(2).padStart(10, '0')));
     console.log(this.splits.length);
   }
 }
+
+export interface PinCombo {
+type: LeaveType;
+  value: number;
+}
+
+export type LeaveType = 'regular' | 'split';

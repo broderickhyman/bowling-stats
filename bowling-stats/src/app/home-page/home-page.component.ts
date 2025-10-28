@@ -15,7 +15,7 @@ import { BaseChartDirective } from 'ng2-charts';
   imports: [BaseChartDirective, MatCardModule, StatCard, PinCard],
 })
 export class HomePage {
-  private pinpalService = inject(PinpalService);
+  public pinpalService = inject(PinpalService);
   loading = signal(true);
   games = signal<Game[]>([]);
   stats?: Stats;
