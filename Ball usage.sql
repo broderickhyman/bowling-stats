@@ -1,0 +1,22 @@
+SELECT
+b.pk
+, b.name as 'Ball'
+, count(*) / 10 as 'Games'
+, STRFTIME('%m/%d/%Y', DATETIME(min(w.date), 'unixepoch')) as 'Date'
+from ball b
+inner join frame f on f.ballFk = b.pk
+inner join week w on w.pk = f.weekFk
+
+where b.flags is null
+and f.flags & 1
+-- and f.leagueFk > 0
+
+group by
+b.pk
+, b.name
+
+having
+count(*) > 50
+
+order by
+b.pk
