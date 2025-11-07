@@ -6,11 +6,11 @@ l.name as 'Name'
 , FORMAT('%2.0f%%', CAST((strikes._cnt + IFNULL(pocketHitsNoStrike._cnt, 0)) as float) / allFrames._cnt * 100) as 'Pocket Hits'
 , FORMAT('%2.0f%%', CAST(pickedUpSpares._cnt as float) / potentialSpares._cnt * 100) as 'Spares'
 , FORMAT('%2.0f%%', CAST(pickedUpsinglePinSpares._cnt as float) / singlePinSpares._cnt * 100) as 'Single Pin Pickup'
-, strikes._cnt as 'Strikes'
+-- , strikes._cnt as 'Strikes'
 -- , allFrames._cnt as 'Frame Count'
 -- , potentialSpares._cnt
 -- , pickedUpSpares._cnt
-, IFNULL(pocketHitsNoStrike._cnt, 0) as 'Pocket Hits No Strike'
+-- , IFNULL(pocketHitsNoStrike._cnt, 0) as 'Pocket Hits No Strike'
 -- , framesWithPins._cnt as 'Pin Frames'
 from league l
 inner join week w on w.leagueFk = l.pk
