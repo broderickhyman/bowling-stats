@@ -3,12 +3,13 @@ import { MatListModule } from '@angular/material/list';
 import { PinpalService } from '@core/services/pinpal.service';
 import { Week } from '@core/services/pinpal.model';
 import { MatButtonModule } from '@angular/material/button';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'upload-page',
   templateUrl: './upload-page.component.html',
   styleUrl: './upload-page.component.scss',
-  imports: [MatListModule, MatButtonModule],
+  imports: [MatListModule, MatButtonModule, RouterLink],
 })
 export class UploadPage {
   @ViewChild('fileUpload') fileUpload!: ElementRef;

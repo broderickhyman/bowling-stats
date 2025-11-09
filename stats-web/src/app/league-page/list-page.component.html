@@ -1,8 +1,16 @@
-<div class="mat-headline-medium">Leagues</div>
-@for (league of leagues(); track league) {
-  <div>{{ league.name }}</div>
+@if (leagues().length > 0) {
+  <div class="mat-headline-medium">Leagues</div>
+  <div class="league-overview-grid">
+    @for (league of leagues(); track league.pk) {
+      <league-overview-card [leagueOverview]="league" />
+    }
+  </div>
 }
-<div class="mat-headline-medium">Tournaments</div>
-@for (tournament of tournaments(); track tournament) {
-  <div>{{ tournament.name }}</div>
+@if (tournaments().length > 0) {
+  <div class="mat-headline-medium">Tournaments</div>
+  <div class="league-overview-grid">
+    @for (tournament of tournaments(); track tournament.pk) {
+      <league-overview-card [leagueOverview]="tournament" />
+    }
+  </div>
 }
