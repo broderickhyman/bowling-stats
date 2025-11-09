@@ -1,6 +1,8 @@
-import { Injectable, WritableSignal, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import type { Database, SqlJsStatic } from 'sql.js';
 import { AppDB } from './db.service';
+import { Game, Week } from './pinpal.model';
+import { Stats } from 'app/shared/components/stats.model';
 
 // Declare global initSqlJs function loaded from script
 declare global {
@@ -14,34 +16,133 @@ declare global {
 })
 export class PinpalService {
   private SQL: SqlJsStatic | undefined;
+  private initPromise: Promise<void> | null = null;
   private appDB = inject(AppDB);
   public sqlDB: Database | undefined;
   public loaded = false;
   public status = '';
   public pinCombos: PinCombo[] = [];
 
-  async initialize() {
-    if (!this.SQL) {
-      this.SQL = await window.initSqlJs!({
-        locateFile: (file: string) => `assets/sql-wasm/${file}`,
-      });
+  private async initialize() {
+    if (!this.initPromise) {
+      this.initPromise = (async () => {
+        this.SQL = await window.initSqlJs!({
+          locateFile: (file: string) => `assets/sql-wasm/${file}`,
+        });
+        const file = await this.appDB.databaseFiles.get({
+          title: 'main',
+        });
+        if (file) {
+          this.status = 'Found existing database';
+          await this.loadData(file.data);
+        } else {
+          this.status = 'No database found';
+        }
+        this.calculateLeaves();
+      })();
     }
-    await this.loadExisting();
+    await this.initPromise;
   }
 
-  async loadExisting() {
-    if (this.loaded) {
-      return;
+  async loadGames(count: number) {
+    await this.initialize();
+    if (!this.sqlDB) {
+      return [];
     }
-    const file = await this.appDB.databaseFiles.get({
-      title: 'main',
-    });
-    if (file) {
-      this.status = 'Found existing database';
-      await this.loadData(file.data);
-    } else {
-      this.status = 'No database found';
+    const statement = this.sqlDB.prepare(`SELECT
+g.score
+, w.date
+, g.pk
+from week w
+inner join game g on g.weekFk = w.pk
+where w.leagueFk >= 0
+order by
+w.date desc
+, g.pk
+limit :count;`);
+    statement.bind({ ':count': count });
+    const games: Game[] = [];
+    while (statement.step()) {
+      const data = statement.getAsObject();
+      games.push({
+        pk: data['pk'] as number,
+        score: data['score'] as number,
+        week: {
+          date: new Date((data['date'] as number) * 1000),
+          games: [],
+        },
+      });
     }
+    return games;
+  }
+
+  async loadGameStats(games: Game[]): Promise<Stats> {
+    await this.initialize();
+    if (!this.sqlDB) {
+      return {
+        average: 0,
+        high: 0,
+        count: 0,
+      };
+    }
+    const placeholders = games.map(() => '?').join(',');
+    const query = `SELECT
+avg(g.score)
+, max(g.score)
+, count(g.score)
+from game g
+where g.pk in (${placeholders})`;
+    const statResult = this.sqlDB.exec(
+      query,
+      games.map((g: Game) => g.pk),
+    )[0].values[0];
+    return {
+      average: statResult[0] as number,
+      high: statResult[1] as number,
+      count: statResult[2] as number,
+    };
+  }
+
+  async loadWeeks(count: number) {
+    await this.initialize();
+    const weeks = new Map<number, Week>();
+    if (!this.sqlDB) {
+      return weeks;
+    }
+    const statement = this.sqlDB.prepare(`SELECT
+w.date
+, w.pk as 'week_pk'
+, g.score
+, g.pk as 'game_pk'
+from week w
+inner join (
+	SELECT
+	w.pk
+	from week w
+	order by w.date desc
+	limit :count
+) as sub on sub.pk = w.pk
+inner join game g on g.weekFk = w.pk
+order by
+w.date desc
+, g.pk;`);
+    statement.bind({ ':count': count });
+    while (statement.step()) {
+      const data = statement.getAsObject();
+      const weekId = data['week_pk'] as number;
+      if (!weeks.has(weekId)) {
+        weeks.set(weekId, {
+          date: new Date((data['date'] as number) * 1000),
+          games: [],
+        });
+      }
+      weeks.get(weekId)?.games.push({
+        score: data['score'] as number,
+        pk: data['game_pk'] as number,
+      });
+    }
+    statement.free();
+    return weeks;
   }
 
   private async loadData(data: Uint8Array) {
@@ -49,12 +150,12 @@ export class PinpalService {
       this.sqlDB.close();
     }
     this.sqlDB = new this.SQL!.Database(data);
-    this.calculateLeaves();
     this.loaded = true;
+    this.status = 'Loaded existing database';
   }
 
-  async importDatabase(statusUpdate: WritableSignal<string>, file: File): Promise<void> {
-    statusUpdate.set('Importing file');
+  async importDatabase(file: File): Promise<void> {
+    await this.initialize();
     const arrayBuffer = await file.arrayBuffer();
     const rawData = new Uint8Array(arrayBuffer);
     const startPosition = this.findStartPosition(rawData);
@@ -67,10 +168,9 @@ export class PinpalService {
       data: sqliteData,
     });
     await this.loadData(sqliteData);
-    statusUpdate.set('Database loaded');
   }
 
-  findStartPosition(rawData: Uint8Array): number {
+  private findStartPosition(rawData: Uint8Array): number {
     let index = 0;
     let currentByte = rawData[index];
     const searchString = 'SQLite format 3';
@@ -92,7 +192,7 @@ export class PinpalService {
     return -1;
   }
 
-  calculateLeaves() {
+  private calculateLeaves() {
     const adjacency = [
       [2, 3],
       [4, 5, 8],
