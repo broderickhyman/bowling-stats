@@ -3,12 +3,13 @@ import { LeagueOverview } from '@core/services/pinpal.model';
 import { PinpalService } from '@core/services/pinpal.service';
 import { LeagueOverviewCard } from './overview-card.component';
 import { Router } from '@angular/router';
+import { MatTabsModule } from '@angular/material/tabs';
 
 @Component({
   selector: 'league-list-page',
   templateUrl: './list-page.component.html',
   styleUrl: './list-page.component.scss',
-  imports: [LeagueOverviewCard],
+  imports: [LeagueOverviewCard, MatTabsModule],
 })
 export class LeagueListPage {
   public pinpalService = inject(PinpalService);
