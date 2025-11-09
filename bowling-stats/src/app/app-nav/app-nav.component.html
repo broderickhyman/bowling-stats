@@ -1,9 +1,9 @@
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav
-    #drawer
+    #sidenav
     class="sidenav"
     fixedInViewport
-    [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+    [attr.role]="'navigation'"
     [mode]="(isHandset$ | async) ? 'over' : 'side'"
     [opened]="(isHandset$ | async) === false"
   >
@@ -13,10 +13,10 @@
       <a mat-list-item routerLink="/upload">Upload</a>
     </mat-nav-list>
   </mat-sidenav>
-  <mat-sidenav-content>
+  <mat-sidenav-content [attr.role]="'main'">
     <mat-toolbar color="primary">
       @if (isHandset$ | async) {
-        <button type="button" aria-label="Toggle sidenav" matIconButton (click)="drawer.toggle()">
+        <button type="button" aria-label="Toggle sidenav" matIconButton (click)="sidenav.toggle()">
           <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
         </button>
       }

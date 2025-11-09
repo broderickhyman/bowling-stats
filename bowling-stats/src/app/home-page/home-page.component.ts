@@ -1,21 +1,25 @@
 import { Component, inject, signal } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { Game } from '@core/services/pinpal.model';
 import { PinpalService } from '@core/services/pinpal.service';
+import { PinCard } from 'app/shared/components/pin-card.component';
 import { StatCard } from 'app/shared/components/stat-card.component';
 import { Stats } from 'app/shared/components/stats.model';
 import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'home-page',
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.scss',
-  imports: [BaseChartDirective, MatCardModule, StatCard],
+  imports: [BaseChartDirective, MatCardModule, StatCard, PinCard, MatButtonModule, RouterLink],
 })
 export class HomePage {
-  private pinpalService = inject(PinpalService);
+  public pinpalService = inject(PinpalService);
   loading = signal(true);
+  existingData = signal(false);
   games = signal<Game[]>([]);
   stats?: Stats;
   chartData: ChartConfiguration['data'] = {
@@ -54,6 +58,7 @@ export class HomePage {
       alert('Failed to load existing');
     }
     this.loadData();
+    this.loading.set(false);
   }
 
   loadData() {
@@ -61,6 +66,7 @@ export class HomePage {
     if (!sql) {
       return;
     }
+    this.existingData.set(true);
     const gamesResult = sql.exec(`SELECT
 g.score
 , w.date
@@ -73,14 +79,16 @@ w.date desc
 , g.pk
 limit 30;`)[0];
     const games = gamesResult.values
-      .map((v: any): Game => ({
-        pk: v[2] as number,
-        score: v[0] as number,
-        week: {
-          date: new Date((v[1] as number) * 1000),
-          games: [],
-        },
-      }))
+      .map(
+        (v: any): Game => ({
+          pk: v[2] as number,
+          score: v[0] as number,
+          week: {
+            date: new Date((v[1] as number) * 1000),
+            games: [],
+          },
+        }),
+      )
       .sort((a: Game, b: Game) => {
         if (a.week?.date == b.week?.date) {
           return a.pk - b.pk;
@@ -107,6 +115,5 @@ where g.pk in (${placeholders})`;
       high: statResult[1] as number,
       count: statResult[2] as number,
     };
-    this.loading.set(false);
   }
 }
