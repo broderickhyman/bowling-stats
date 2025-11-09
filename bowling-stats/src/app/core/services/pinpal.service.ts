@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import type { Database, SqlJsStatic } from 'sql.js';
 import { AppDB } from './db.service';
-import { Game, Week } from './pinpal.model';
+import { Game, LeagueOverview, Week } from './pinpal.model';
 import { Stats } from 'app/shared/components/stats.model';
 
 // Declare global initSqlJs function loaded from script
@@ -42,6 +42,46 @@ export class PinpalService {
       })();
     }
     await this.initPromise;
+  }
+
+  async loadLeagueOverviews() {
+    await this.initialize();
+    if (!this.sqlDB) {
+      return [];
+    }
+    const statement = this.sqlDB.prepare(`SELECT
+l.pk
+, l.name
+, l.flags
+, ROUND(avg(g.score), 2) as 'average'
+, count(g.score) as 'count'
+, min(w.date) as 'start'
+, max(w.date) as 'end'
+from league l
+inner join game g on g.leagueFk = l.pk
+inner join week w on w.pk = g.weekFk
+
+group by
+l.pk
+, l.name
+, l.flags
+
+order by
+max(w.date) desc`);
+    const leagues: LeagueOverview[] = [];
+    while (statement.step()) {
+      const data = statement.getAsObject();
+      leagues.push({
+        pk: data['pk'] as number,
+        name: data['name'] as string,
+        type: ((data['flags'] as number) & 1) == 1 ? 'tournament' : 'regular',
+        average: data['average'] as number,
+        count: data['count'] as number,
+        start: new Date((data['start'] as number) * 1000),
+        end: new Date((data['end'] as number) * 1000),
+      });
+    }
+    return leagues;
   }
 
   async loadGames(count: number) {

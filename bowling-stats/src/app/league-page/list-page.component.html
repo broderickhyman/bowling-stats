@@ -1,0 +1,8 @@
+<div class="mat-headline-medium">Leagues</div>
+@for (league of leagues(); track league) {
+  <div>{{ league.name }}</div>
+}
+<div class="mat-headline-medium">Tournaments</div>
+@for (tournament of tournaments(); track tournament) {
+  <div>{{ tournament.name }}</div>
+}
