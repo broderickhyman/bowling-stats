@@ -1,14 +1,14 @@
-import { Component, Input, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, Input, ViewChild, inject, signal } from '@angular/core';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AsyncPipe } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import { filter, map, shareReplay } from 'rxjs/operators';
 
 @Component({
   selector: 'app-app-nav',
@@ -25,6 +25,7 @@ import { map, shareReplay } from 'rxjs/operators';
   ],
 })
 export class AppNavComponent {
+  @ViewChild('sidenav') sidenav!: MatSidenav;
   @Input() title: string = '';
   private breakpointObserver = inject(BreakpointObserver);
 
@@ -32,4 +33,14 @@ export class AppNavComponent {
     map((result) => result.matches),
     shareReplay(),
   );
+
+  constructor(private router: Router) {}
+
+  ngOnInit() {
+    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
+      if (this.sidenav?.mode === 'over') {
+        this.sidenav.close();
+      }
+    });
+  }
 }

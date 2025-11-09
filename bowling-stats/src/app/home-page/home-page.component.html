@@ -1,6 +1,6 @@
 @if (loading()) {
-  <div>Loading...</div>
-} @else {
+  <div class="mat-headline-medium">Checking for existing data</div>
+} @else if (existingData()) {
   <div class="mat-headline-medium">Overview</div>
   <div class="mat-title-medium">Last {{ games().length }} league games</div>
   @if (stats) {
@@ -16,10 +16,13 @@
     [options]="chartOptions"
     [type]="'line'"
   ></canvas>
-  @for (pinCombo of pinpalService.pinCombos; track pinCombo) {
-  <pin-card [value]="pinCombo.value" />
-  <br/>
-    <div>{{pinCombo.type}}</div>
-    <br/>
-  }
+  <!-- @for (pinCombo of pinpalService.pinCombos; track pinCombo) { -->
+  <!-- <pin-card [value]="pinCombo.value" /> -->
+  <!-- <br/> -->
+  <!--   <div>{{pinCombo.type}}</div> -->
+  <!--   <br/> -->
+  <!-- } -->
+} @else {
+  <div class="mat-headline-medium">No Data Found</div>
+  <a matButton="filled" routerLink="/upload">Upload Page</a>
 }

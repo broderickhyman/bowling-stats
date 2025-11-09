@@ -1,14 +1,17 @@
-import { Component, Input, inject, signal } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild, inject, signal, viewChild } from '@angular/core';
 import { MatListModule } from '@angular/material/list';
 import { PinpalService } from '@core/services/pinpal.service';
 import { Week } from '@core/services/pinpal.model';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'upload-page',
   templateUrl: './upload-page.component.html',
-  imports: [MatListModule],
+  styleUrl: './upload-page.component.scss',
+  imports: [MatListModule, MatButtonModule],
 })
 export class UploadPage {
+  @ViewChild('fileUpload') fileUpload!: ElementRef;
   private pinpalService = inject(PinpalService);
   status = signal('Loading...');
   weeks = signal<Week[]>([]);
@@ -81,5 +84,9 @@ w.date desc
       return acc;
     }, weeks);
     this.weeks.set([...weeks.values()]);
+  }
+
+  onUploadClick() {
+    this.fileUpload.nativeElement.click();
   }
 }

@@ -18,7 +18,6 @@ export class PinpalService {
   public sqlDB: Database | undefined;
   public loaded = false;
   public status = '';
-  private splits: PinCombo[] = [];
   public pinCombos: PinCombo[] = [];
 
   async initialize() {
@@ -50,7 +49,7 @@ export class PinpalService {
       this.sqlDB.close();
     }
     this.sqlDB = new this.SQL!.Database(data);
-    this.calculateSplits();
+    this.calculateLeaves();
     this.loaded = true;
   }
 
@@ -93,7 +92,7 @@ export class PinpalService {
     return -1;
   }
 
-  calculateSplits() {
+  calculateLeaves() {
     const adjacency = [
       [2, 3],
       [4, 5, 8],
@@ -157,7 +156,6 @@ export class PinpalService {
         }
         if (pinCounter < standingPins) {
           pinCombo.type = 'split';
-          this.splits.push(pinCombo);
         }
         break;
       }
