@@ -96,22 +96,20 @@ export class PinpalService {
   calculateSplits() {
     const adjacency = [
       [2, 3],
-      [1, 4, 5],
-      [1, 5, 6],
-      [2, 7, 8],
-      [2, 3, 8, 9],
-      [3, 9, 10],
-      [4],
-      [4, 5],
-      [5, 6],
-      [6],
+      [4, 5, 8],
+      [5, 6, 9],
+      [7, 8],
+      [8, 9],
+      [9, 10],
     ];
     for (var pinComboNumber = 1; pinComboNumber < 1024; pinComboNumber++) {
-      // for (var pinCombo = 1; pinCombo < 16; pinCombo++) {
-      if (pinComboNumber & 1) {
-        // Head pin
-        continue;
-      } else if (
+      const pinCombo: PinCombo = {
+        type: 'regular',
+        value: pinComboNumber,
+      };
+      this.pinCombos.push(pinCombo);
+      if (
+        pinComboNumber == 1 ||
         pinComboNumber == 2 ||
         pinComboNumber == 4 ||
         pinComboNumber == 8 ||
@@ -122,48 +120,56 @@ export class PinpalService {
         pinComboNumber == 256 ||
         pinComboNumber == 512
       ) {
-        // Single pin
+        pinCombo.type = 'single';
+        continue;
+      } else if (pinComboNumber & 1) {
+        // Head pin
         continue;
       }
-      // console.log('  ' + pinCombo.toString(2).padStart(10, '0'));
       // Starting at 1 to skip the head pin
       let bitOffset = 1;
-      let split = false;
+      const standingPins = pinComboNumber.toString(2).replaceAll('0', '').length;
       while (bitOffset < 10) {
         const pinValue = (pinComboNumber >> bitOffset) & 1;
         if (pinValue == 0) {
           bitOffset++;
           continue;
         }
-        // console.log(bitOffset);
-        const connectedPins = adjacency[bitOffset];
-        // console.log(connectedPins);
-        const foundPin = connectedPins.some((cp) => ((pinComboNumber >> (cp - 1)) & 1) == 1);
-        if (!foundPin) {
-          split = true;
-          // console.log('Split');
-          break;
+        const q: number[] = [bitOffset];
+        let pinCounter = 0;
+        while (q.length > 0) {
+          const nextBitOffset = q.shift()!;
+          const nextPinValue = (pinComboNumber >> nextBitOffset) & 1;
+          if (nextPinValue == 0) {
+            continue;
+          }
+          pinCounter++;
+          if (nextBitOffset > 5) {
+            continue;
+          }
+          const connectedPins = adjacency[nextBitOffset];
+          connectedPins.forEach((cp) => {
+            const adjusted = cp - 1;
+            if (!q.includes(adjusted)) {
+              q.push(adjusted);
+            }
+          });
         }
-        bitOffset++;
-      }
-const pinCombo: PinCombo = {
-        type: split ? 'split' : 'regular',
-        value: pinComboNumber
-      };
-      this.pinCombos.push(pinCombo);
-      if (split) {
-        this.splits.push(pinCombo);
+        if (pinCounter < standingPins) {
+          pinCombo.type = 'split';
+          this.splits.push(pinCombo);
+        }
+        break;
       }
     }
 
-    this.splits.forEach((v) => console.log(v.value.toString(2).padStart(10, '0')));
-    console.log(this.splits.length);
+    // console.log(this.splits.length);
   }
 }
 
 export interface PinCombo {
-type: LeaveType;
+  type: LeaveType;
   value: number;
 }
 
-export type LeaveType = 'regular' | 'split';
+export type LeaveType = 'regular' | 'single' | 'split';
