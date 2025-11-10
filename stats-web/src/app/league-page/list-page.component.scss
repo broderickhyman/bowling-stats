@@ -1,0 +1,16 @@
+.league-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+mat-tab-group {
+  height: calc(100vh - var(--mat-toolbar-standard-height, 64px));
+
+  ::ng-deep {
+    .mat-mdc-tab-body-wrapper {
+      height: 100%;
+    }
+  }
+}

@@ -1,0 +1,19 @@
+@if (stats()) {
+  <stat-card [displayText]="'Average'" [value]="stats()!.average" />
+  <stat-card [displayText]="'High Score'" [value]="stats()!.high" />
+  <stat-card [displayText]="'Count'" [value]="stats()!.count" />
+}
+<div class="mat-headline-medium">Score</div>
+<canvas
+  class="score-chart"
+  baseChart
+  [data]="chartData"
+  [options]="chartOptions"
+  [type]="'line'"
+></canvas>
+<!-- @for (pinCombo of pinpalService.pinCombos; track pinCombo) { -->
+<!-- <pin-card [value]="pinCombo.value" /> -->
+<!-- <br/> -->
+<!--   <div>{{pinCombo.type}}</div> -->
+<!--   <br/> -->
+<!-- } -->

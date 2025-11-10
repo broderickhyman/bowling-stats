@@ -1,0 +1,20 @@
+<mat-tab-group preserveContent>
+  @if (leagues().length > 0) {
+    <mat-tab label="Leagues">
+      <div class="league-overview-grid">
+        @for (league of leagues(); track league.pk) {
+          <league-overview-card [leagueOverview]="league" />
+        }
+      </div>
+    </mat-tab>
+  }
+  @if (tournaments().length > 0) {
+    <mat-tab label="Tournaments">
+      <div class="league-overview-grid">
+        @for (tournament of tournaments(); track tournament.pk) {
+          <league-overview-card [leagueOverview]="tournament" />
+        }
+      </div>
+    </mat-tab>
+  }
+</mat-tab-group>
