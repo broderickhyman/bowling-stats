@@ -1,0 +1,8 @@
+.score-chart {
+  // TODO: https://www.chartjs.org/docs/latest/configuration/responsive.html#important-note
+  max-height: 50vh;
+
+  @media (min-width: 1000px) {
+    max-width: 60vw;
+  }
+}

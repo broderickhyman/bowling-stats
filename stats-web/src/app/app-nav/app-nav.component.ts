@@ -1,4 +1,4 @@
-import { Component, Input, ViewChild, inject, signal } from '@angular/core';
+import { Component, inject, input, viewChild } from '@angular/core';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AsyncPipe } from '@angular/common';
@@ -25,8 +25,9 @@ import { filter, map, shareReplay } from 'rxjs/operators';
   ],
 })
 export class AppNavComponent {
-  @ViewChild('sidenav') sidenav!: MatSidenav;
-  @Input() title: string = '';
+  router = inject(Router);
+  sidenav = viewChild.required<MatSidenav>('sidenav');
+  title = input('');
   private breakpointObserver = inject(BreakpointObserver);
 
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset).pipe(
@@ -34,12 +35,11 @@ export class AppNavComponent {
     shareReplay(),
   );
 
-  constructor(private router: Router) {}
-
   ngOnInit() {
     this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
-      if (this.sidenav?.mode === 'over') {
-        this.sidenav.close();
+      const _sidenav = this.sidenav();
+      if (_sidenav.mode === 'over') {
+        _sidenav.close();
       }
     });
   }

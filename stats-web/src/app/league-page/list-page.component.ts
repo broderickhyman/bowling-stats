@@ -12,11 +12,10 @@ import { MatTabsModule } from '@angular/material/tabs';
   imports: [LeagueOverviewCard, MatTabsModule],
 })
 export class LeagueListPage {
+  router = inject(Router);
   public pinpalService = inject(PinpalService);
   leagues = signal<LeagueOverview[]>([]);
   tournaments = signal<LeagueOverview[]>([]);
-
-  constructor(private router: Router) {}
 
   async ngOnInit() {
     const all = await this.pinpalService.loadLeagueOverviews();
