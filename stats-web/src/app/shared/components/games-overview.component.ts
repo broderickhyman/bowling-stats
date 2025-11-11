@@ -50,10 +50,6 @@ export class GamesOverview {
 
   async ngOnInit() {
     const games = this.games();
-    if (games.length == 0) {
-      await this.router.navigate(['/upload']);
-      return;
-    }
     this.chartData.datasets[0].data = games.map((g: Game) => g.score);
     this.chartData.labels = games.map((g: Game) => g.week!.date.toLocaleDateString());
 
