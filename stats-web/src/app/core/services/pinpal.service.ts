@@ -3,6 +3,7 @@ import type { Database, SqlJsStatic } from 'sql.js';
 import { AppDB } from './db.service';
 import { Game, LeagueOverview, Week } from './pinpal.model';
 import { Stats } from 'app/shared/components/stats.model';
+import { GameQueryOptions } from './pinpal-query.model';
 
 // Declare global initSqlJs function loaded from script
 declare global {
@@ -84,23 +85,39 @@ max(w.date) desc`);
     return leagues;
   }
 
-  async loadGames(count: number) {
+  async loadGames(options: GameQueryOptions) {
     await this.initialize();
     if (!this.sqlDB) {
       return [];
     }
-    const statement = this.sqlDB.prepare(`SELECT
+    let sql = `SELECT
 g.score
 , w.date
 , g.pk
 from week w
 inner join game g on g.weekFk = w.pk
-where w.leagueFk >= 0
-order by
+where 1=1`;
+    const params: any[] = [];
+    if (options.leagueId) {
+      sql += `
+and w.leagueFk = ?
+`;
+      params.push(options.leagueId);
+    } else {
+      sql += `
+and w.leagueFk >= 0
+`;
+    }
+    sql += `order by
 w.date desc
-, g.pk
-limit :count;`);
-    statement.bind({ ':count': count });
+, g.pk`;
+    if (options.limit) {
+      sql += `
+limit ?`;
+      params.push(options.limit);
+    }
+    const statement = this.sqlDB.prepare(sql);
+    statement.bind(params);
     const games: Game[] = [];
     while (statement.step()) {
       const data = statement.getAsObject();
