@@ -140,7 +140,14 @@ limit ?`;
         },
       });
     }
-    return games;
+    return games.sort((a, b) => {
+      const aDate = a.week?.date.getTime() ?? 0;
+      const bDate = b.week?.date.getTime() ?? 0;
+      if (aDate == aDate) {
+        return a.pk - b.pk;
+      }
+      return aDate - bDate;
+    });
   }
 
   async loadGameStats(games: Game[]): Promise<Stats> {
