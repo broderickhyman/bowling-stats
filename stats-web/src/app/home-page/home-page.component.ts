@@ -24,11 +24,8 @@ export class HomePage {
   }
 
   async loadData() {
-    const games = (await this.pinpalService.loadGames(30)).sort((a: Game, b: Game) => {
-      if (a.week?.date == b.week?.date) {
-        return a.pk - b.pk;
-      }
-      return a.week!.date.getTime() - b.week!.date.getTime();
+    const games = await this.pinpalService.loadGames({
+      limit: 30,
     });
     if (games.length == 0) {
       return;

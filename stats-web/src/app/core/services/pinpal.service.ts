@@ -3,6 +3,7 @@ import type { Database, SqlJsStatic } from 'sql.js';
 import { AppDB } from './db.service';
 import { Game, LeagueOverview, Week } from './pinpal.model';
 import { Stats } from 'app/shared/components/stats.model';
+import { GameQueryOptions, LeagueQueryOptions } from './pinpal-query.model';
 
 // Declare global initSqlJs function loaded from script
 declare global {
@@ -44,12 +45,13 @@ export class PinpalService {
     await this.initPromise;
   }
 
-  async loadLeagueOverviews() {
+  async loadLeagueOverviews(options: LeagueQueryOptions) {
     await this.initialize();
     if (!this.sqlDB) {
       return [];
     }
-    const statement = this.sqlDB.prepare(`SELECT
+    const params: any[] = [];
+    let sql = `SELECT
 l.pk
 , l.name
 , l.flags
@@ -60,14 +62,24 @@ l.pk
 from league l
 inner join game g on g.leagueFk = l.pk
 inner join week w on w.pk = g.weekFk
-
+where 1=1`;
+    if (options.leagueId) {
+      sql += `
+and l.pk = ?`;
+      params.push(options.leagueId);
+    }
+    sql += `
 group by
 l.pk
 , l.name
-, l.flags
-
+, l.flags`;
+    if (!options.leagueId) {
+      sql += `
 order by
-max(w.date) desc`);
+max(w.date) desc`;
+    }
+    const statement = this.sqlDB.prepare(sql);
+    statement.bind(params);
     const leagues: LeagueOverview[] = [];
     while (statement.step()) {
       const data = statement.getAsObject();
@@ -84,23 +96,38 @@ max(w.date) desc`);
     return leagues;
   }
 
-  async loadGames(count: number) {
+  async loadGames(options: GameQueryOptions) {
     await this.initialize();
     if (!this.sqlDB) {
       return [];
     }
-    const statement = this.sqlDB.prepare(`SELECT
+    let sql = `SELECT
 g.score
 , w.date
 , g.pk
 from week w
 inner join game g on g.weekFk = w.pk
-where w.leagueFk >= 0
+where 1=1`;
+    const params: any[] = [];
+    if (options.leagueId) {
+      sql += `
+and w.leagueFk = ?`;
+      params.push(options.leagueId);
+    } else {
+      sql += `
+and w.leagueFk >= 0`;
+    }
+    sql += `
 order by
 w.date desc
-, g.pk
-limit :count;`);
-    statement.bind({ ':count': count });
+, g.pk`;
+    if (options.limit) {
+      sql += `
+limit ?`;
+      params.push(options.limit);
+    }
+    const statement = this.sqlDB.prepare(sql);
+    statement.bind(params);
     const games: Game[] = [];
     while (statement.step()) {
       const data = statement.getAsObject();
@@ -113,7 +140,14 @@ limit :count;`);
         },
       });
     }
-    return games;
+    return games.sort((a, b) => {
+      const aDate = a.week?.date.getTime() ?? 0;
+      const bDate = b.week?.date.getTime() ?? 0;
+      if (aDate == aDate) {
+        return a.pk - b.pk;
+      }
+      return aDate - bDate;
+    });
   }
 
   async loadGameStats(games: Game[]): Promise<Stats> {

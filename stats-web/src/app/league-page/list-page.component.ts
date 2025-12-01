@@ -18,7 +18,7 @@ export class LeagueListPage {
   tournaments = signal<LeagueOverview[]>([]);
 
   async ngOnInit() {
-    const all = await this.pinpalService.loadLeagueOverviews();
+    const all = await this.pinpalService.loadLeagueOverviews({});
     if (all.length == 0) {
       await this.router.navigate(['/upload']);
       return;
