@@ -12,7 +12,7 @@ inner join week w on w.pk = f.weekFk
 where b.flags is null
 and f.flags & 1
 and f.leagueFk > 0
-and w.date > 1742248478
+-- and w.date > 1742248478
 
 group by
 b.pk
@@ -22,5 +22,5 @@ having
 count(*) > 50
 
 order by
--- b.pk
-avg(f.scores & 15) desc
+b.pk
+-- avg(f.scores & 15) desc
