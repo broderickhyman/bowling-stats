@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import type { Database, SqlJsStatic } from 'sql.js';
 import { AppDB } from './db.service';
-import { Game, LeagueOverview, Week } from './pinpal.model';
+import { Game, LeagueOverview, Week, BallStats } from './pinpal.model';
 import { Stats } from 'app/shared/components/stats.model';
 import { GameQueryOptions, LeagueQueryOptions } from './pinpal-query.model';
 
@@ -94,6 +94,46 @@ max(w.date) desc`;
       });
     }
     return leagues;
+  }
+
+  async loadBallStats() {
+    await this.initialize();
+    if (!this.sqlDB) {
+      return [];
+    }
+
+    const sql = `SELECT
+  b.pk,
+  b.name as 'Ball',
+  count(*) / 10 as 'Games',
+  ROUND(avg(f.scores & 15), 2) as 'Average',
+  min(w.date) as 'Date'
+FROM ball b
+INNER JOIN frame f ON f.ballFk = b.pk
+INNER JOIN week w ON w.pk = f.weekFk
+WHERE 1=1
+  AND f.flags & 1
+  AND f.leagueFk > 0
+GROUP BY b.pk, b.name
+HAVING count(*) / 10 > 10
+ORDER BY b.pk DESC`;
+
+    const statement = this.sqlDB.prepare(sql);
+    const ballStats: BallStats[] = [];
+
+    while (statement.step()) {
+      const data = statement.getAsObject();
+      ballStats.push({
+        pk: data['pk'] as number,
+        name: data['Ball'] as string,
+        games: data['Games'] as number,
+        average: data['Average'] as number,
+        firstUsed: new Date((data['Date'] as number) * 1000),
+      });
+    }
+
+    statement.free();
+    return ballStats;
   }
 
   async loadGames(options: GameQueryOptions) {

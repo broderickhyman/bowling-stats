@@ -19,8 +19,8 @@ b.pk
 , b.name
 
 having
-count(*) > 50
+count(*) / 10 > 10
 
 order by
-b.pk
+b.pk desc
 -- avg(f.scores & 15) desc

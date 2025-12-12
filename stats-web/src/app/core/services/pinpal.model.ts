@@ -21,3 +21,11 @@ export interface LeagueOverview extends League {
   start: Date;
   end: Date;
 }
+
+export interface BallStats {
+  pk: number;
+  name: string;
+  games: number;
+  average: number;
+  firstUsed: Date;
+}
