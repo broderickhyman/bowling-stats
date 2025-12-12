@@ -4,6 +4,7 @@ import { UploadPage } from './upload-page/upload-page.component';
 import { LeagueListPage } from './league-page/list-page.component';
 import { LeaguePage } from './league-page/league-page.component';
 import { BallsPage } from './balls-page/balls-page.component';
+import { MonthlyPage } from './monthly-page/monthly-page.component';
 
 export const routes: Routes = [
   {
@@ -25,5 +26,9 @@ export const routes: Routes = [
   {
     path: 'balls',
     component: BallsPage,
+  },
+  {
+    path: 'monthly',
+    component: MonthlyPage,
   },
 ];

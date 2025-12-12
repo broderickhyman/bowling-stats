@@ -29,3 +29,14 @@ export interface BallStats {
   average: number;
   firstUsed: Date;
 }
+
+export interface MonthlyStats {
+  date: string;
+  averageScore: number;
+  strikesPercent: number;
+  pocketHitsPercent: number;
+  opensPercent: number;
+  sparesPercent: number;
+  singlePinPickupPercent: number;
+  gutters: number;
+}

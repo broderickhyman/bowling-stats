@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import type { Database, SqlJsStatic } from 'sql.js';
 import { AppDB } from './db.service';
-import { Game, LeagueOverview, Week, BallStats } from './pinpal.model';
+import { Game, LeagueOverview, Week, BallStats, MonthlyStats } from './pinpal.model';
 import { Stats } from 'app/shared/components/stats.model';
 import { GameQueryOptions, LeagueQueryOptions } from './pinpal-query.model';
 
@@ -134,6 +134,168 @@ ORDER BY b.pk DESC`;
 
     statement.free();
     return ballStats;
+  }
+
+  async loadMonthlyStats() {
+    await this.initialize();
+    if (!this.sqlDB) {
+      return [];
+    }
+
+    const sql = `SELECT
+  STRFTIME('%Y-%m', DATETIME(w.date, 'unixepoch')) as 'date',
+  CAST(AVG(averageScore._avg) as int) as 'averageScore',
+  SUM(strikes._cnt) as 'strikeCount',
+  SUM(allFrames._cnt) as 'allFrameCount',
+  SUM(IFNULL(pocketHitsNoStrike._cnt, 0)) as 'pocketHitNoStrikeCount',
+  SUM(opens._cnt) as 'openCount',
+  SUM(pickedUpSpares._cnt) as 'pickedUpSpareCount',
+  SUM(potentialSpares._cnt) as 'potentialSpareCount',
+  SUM(pickedUpsinglePinSpares._cnt) as 'singlePinSparePickupCount',
+  SUM(singlePinSpares._cnt) as 'singlePinSpareCount',
+  SUM(IFNULL(gutters._cnt, 0)) as 'gutters'
+FROM league l
+INNER JOIN week w on w.leagueFk = l.pk
+INNER JOIN (
+  SELECT
+    g.weekFk,
+    count(*) as _cnt
+  FROM game g
+  INNER JOIN frame f on f.gameFk = g.pk
+  WHERE f.scores & 15 = 10
+  GROUP BY g.weekFk
+) as strikes on strikes.weekFk = w.pk
+INNER JOIN (
+  SELECT
+    g.weekFk,
+    count(*) as _cnt
+  FROM game g
+  INNER JOIN frame f on f.gameFk = g.pk
+  WHERE f.flags & 1 = 1
+    AND f.scores >> 4 < 10
+    AND f.flags & 2
+  GROUP BY g.weekFk
+) as opens on opens.weekFk = w.pk
+INNER JOIN (
+  SELECT
+    g.weekFk,
+    count(*) as _cnt
+  FROM game g
+  INNER JOIN frame f on f.gameFk = g.pk
+  WHERE f.flags & 1 = 1
+  GROUP BY g.weekFk
+) as allFrames on allFrames.weekFk = w.pk
+INNER JOIN (
+  SELECT
+    g.weekFk,
+    avg(g.score) as _avg
+  FROM game g
+  GROUP BY g.weekFk
+) as averageScore on averageScore.weekFk = w.pk
+INNER JOIN (
+  SELECT
+    g.weekFk,
+    count(*) as _cnt
+  FROM game g
+  INNER JOIN frame f on f.gameFk = g.pk
+  WHERE f.scores & 15 < 10
+    AND f.frameNum <= 10
+    AND f.flags & 1
+    AND f.flags & 2
+  GROUP BY g.weekFk
+) as potentialSpares on potentialSpares.weekFk = w.pk
+INNER JOIN (
+  SELECT
+    g.weekFk,
+    count(*) as _cnt
+  FROM game g
+  INNER JOIN frame f on f.gameFk = g.pk
+  WHERE f.scores & 15 < 10
+    AND f.flags & 1
+    AND f.flags & 2
+    AND f.scores >> 4 = 10
+  GROUP BY g.weekFk
+) as pickedUpSpares on pickedUpSpares.weekFk = w.pk
+INNER JOIN (
+  SELECT
+    g.weekFk,
+    count(*) as _cnt
+  FROM game g
+  INNER JOIN frame f on f.gameFk = g.pk
+  WHERE f.scores & 15 = 9
+    AND f.flags & 1
+    AND f.flags & 2
+  GROUP BY g.weekFk
+) as singlePinSpares on singlePinSpares.weekFk = w.pk
+INNER JOIN (
+  SELECT
+    g.weekFk,
+    count(*) as _cnt
+  FROM game g
+  INNER JOIN frame f on f.gameFk = g.pk
+  WHERE f.pins >> 6 > 0 and f.pins & 0x3F = 0
+  GROUP BY g.weekFk
+) as pocketHitsNoStrike on pocketHitsNoStrike.weekFk = w.pk
+INNER JOIN (
+  SELECT
+    g.weekFk,
+    count(*) as _cnt
+  FROM game g
+  INNER JOIN frame f on f.gameFk = g.pk
+  WHERE f.scores & 15 = 9
+    AND f.flags & 1
+    AND f.flags & 2
+    AND f.scores >> 4 = 10
+  GROUP BY g.weekFk
+) as pickedUpsinglePinSpares on pickedUpsinglePinSpares.weekFk = w.pk
+LEFT JOIN (
+  SELECT
+    g.weekFk,
+    count(*) as _cnt
+  FROM game g
+  INNER JOIN frame f on f.gameFk = g.pk
+  WHERE f.flags & 1
+    AND f.scores & 15 = 0 and f.frameNum < 11
+  GROUP BY g.weekFk
+) as gutters on gutters.weekFk = w.pk
+WHERE DATETIME(w.date, 'unixepoch') > '2021-01-01'
+GROUP BY STRFTIME('%Y-%m', DATETIME(w.date, 'unixepoch'))
+ORDER BY w.date DESC`;
+
+    const statement = this.sqlDB.prepare(sql);
+    const monthlyStats: MonthlyStats[] = [];
+
+    const calculatePercent = (numerator: number, denominator: number): number => {
+      if (denominator === 0) return 0;
+      return Math.round((numerator / denominator) * 100);
+    };
+
+    while (statement.step()) {
+      const data = statement.getAsObject();
+
+      const strikeCount = data['strikeCount'] as number;
+      const allFrameCount = data['allFrameCount'] as number;
+      const pocketHitNoStrikeCount = data['pocketHitNoStrikeCount'] as number;
+      const openCount = data['openCount'] as number;
+      const pickedUpSpareCount = data['pickedUpSpareCount'] as number;
+      const potentialSpareCount = data['potentialSpareCount'] as number;
+      const singlePinSparePickupCount = data['singlePinSparePickupCount'] as number;
+      const singlePinSpareCount = data['singlePinSpareCount'] as number;
+
+      monthlyStats.push({
+        date: data['date'] as string,
+        averageScore: data['averageScore'] as number,
+        strikesPercent: calculatePercent(strikeCount, allFrameCount),
+        pocketHitsPercent: calculatePercent(strikeCount + pocketHitNoStrikeCount, allFrameCount),
+        opensPercent: calculatePercent(openCount, allFrameCount),
+        sparesPercent: calculatePercent(pickedUpSpareCount, potentialSpareCount),
+        singlePinPickupPercent: calculatePercent(singlePinSparePickupCount, singlePinSpareCount),
+        gutters: (data['gutters'] as number) || 0,
+      });
+    }
+
+    statement.free();
+    return monthlyStats;
   }
 
   async loadGames(options: GameQueryOptions) {
