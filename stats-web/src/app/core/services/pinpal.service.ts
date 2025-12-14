@@ -136,6 +136,11 @@ ORDER BY b.pk DESC`;
     return ballStats;
   }
 
+  private calculatePercent(numerator: number, denominator: number): number {
+    if (denominator === 0) return 0;
+    return Math.round((numerator / denominator) * 100);
+  }
+
   async loadMonthlyStats() {
     await this.initialize();
     if (!this.sqlDB) {
@@ -265,11 +270,6 @@ ORDER BY w.date DESC`;
     const statement = this.sqlDB.prepare(sql);
     const monthlyStats: MonthlyStats[] = [];
 
-    const calculatePercent = (numerator: number, denominator: number): number => {
-      if (denominator === 0) return 0;
-      return Math.round((numerator / denominator) * 100);
-    };
-
     while (statement.step()) {
       const data = statement.getAsObject();
 
@@ -285,11 +285,17 @@ ORDER BY w.date DESC`;
       monthlyStats.push({
         date: data['date'] as string,
         averageScore: data['averageScore'] as number,
-        strikesPercent: calculatePercent(strikeCount, allFrameCount),
-        pocketHitsPercent: calculatePercent(strikeCount + pocketHitNoStrikeCount, allFrameCount),
-        opensPercent: calculatePercent(openCount, allFrameCount),
-        sparesPercent: calculatePercent(pickedUpSpareCount, potentialSpareCount),
-        singlePinPickupPercent: calculatePercent(singlePinSparePickupCount, singlePinSpareCount),
+        strikesPercent: this.calculatePercent(strikeCount, allFrameCount),
+        pocketHitsPercent: this.calculatePercent(
+          strikeCount + pocketHitNoStrikeCount,
+          allFrameCount,
+        ),
+        opensPercent: this.calculatePercent(openCount, allFrameCount),
+        sparesPercent: this.calculatePercent(pickedUpSpareCount, potentialSpareCount),
+        singlePinPickupPercent: this.calculatePercent(
+          singlePinSparePickupCount,
+          singlePinSpareCount,
+        ),
         gutters: (data['gutters'] as number) || 0,
       });
     }
@@ -354,30 +360,160 @@ limit ?`;
 
   async loadGameStats(games: Game[]): Promise<Stats> {
     await this.initialize();
-    if (!this.sqlDB) {
+    if (!this.sqlDB || games.length === 0) {
       return {
         average: 0,
         high: 0,
         count: 0,
         cleanCount: 0,
+        strikesPercent: 0,
+        pocketHitsPercent: 0,
+        opensPercent: 0,
+        sparesPercent: 0,
+        singlePinPickupPercent: 0,
+        gutters: 0,
       };
     }
+
     const placeholders = games.map(() => '?').join(',');
+    const params = games.map((g: Game) => g.pk);
+
     const query = `SELECT
-avg(g.score) as 'average'
-, max(g.score) as 'high'
-, count(g.score) as 'count'
-, sum(g.flags & 4 == 4) as 'clean_count'
-from game g
-where g.pk in (${placeholders})`;
+  avg(g.score) as 'average',
+  max(g.score) as 'high',
+  count(g.pk) as 'count',
+  sum(case when g.flags & 4 = 4 then 1 else 0 end) as 'clean_count',
+  sum(strikes._cnt) as 'strike_count',
+  sum(all_frames._cnt) as 'all_frame_count',
+  sum(IFNULL(pocket_hits_no_strike._cnt, 0)) as 'pocket_hit_no_strike_count',
+  sum(opens._cnt) as 'open_count',
+  sum(picked_up_spares._cnt) as 'picked_up_spare_count',
+  sum(potential_spares._cnt) as 'potential_spare_count',
+  sum(picked_up_single_pin_spares._cnt) as 'single_pin_spare_pickup_count',
+  sum(single_pin_spares._cnt) as 'single_pin_spare_count',
+  sum(IFNULL(gutters._cnt, 0)) as 'gutters'
+FROM game g
+LEFT JOIN (
+  SELECT
+    g.pk,
+    count(*) as _cnt
+  FROM game g
+  INNER JOIN frame f on f.gameFk = g.pk
+  WHERE f.scores & 15 = 10
+  GROUP BY g.pk
+) as strikes ON strikes.pk = g.pk
+INNER JOIN (
+  SELECT
+    g.pk,
+    count(*) as _cnt
+  FROM game g
+  INNER JOIN frame f on f.gameFk = g.pk
+  WHERE f.flags & 1 = 1
+  GROUP BY g.pk
+) as all_frames ON all_frames.pk = g.pk
+LEFT JOIN (
+  SELECT
+    g.pk,
+    count(*) as _cnt
+  FROM game g
+  INNER JOIN frame f on f.gameFk = g.pk
+  WHERE f.flags & 1 = 1
+    AND f.scores >> 4 < 10
+    AND f.flags & 2
+  GROUP BY g.pk
+) as opens ON opens.pk = g.pk
+LEFT JOIN (
+  SELECT
+    g.pk,
+    count(*) as _cnt
+  FROM game g
+  INNER JOIN frame f on f.gameFk = g.pk
+  WHERE f.scores & 15 < 10
+    AND f.frameNum <= 10
+    AND f.flags & 1
+    AND f.flags & 2
+  GROUP BY g.pk
+) as potential_spares ON potential_spares.pk = g.pk
+LEFT JOIN (
+  SELECT
+    g.pk,
+    count(*) as _cnt
+  FROM game g
+  INNER JOIN frame f on f.gameFk = g.pk
+  WHERE f.scores & 15 < 10
+    AND f.flags & 1
+    AND f.flags & 2
+    AND f.scores >> 4 = 10
+  GROUP BY g.pk
+) as picked_up_spares ON picked_up_spares.pk = g.pk
+LEFT JOIN (
+  SELECT
+    g.pk,
+    count(*) as _cnt
+  FROM game g
+  INNER JOIN frame f on f.gameFk = g.pk
+  WHERE f.scores & 15 = 9
+    AND f.flags & 1
+    AND f.flags & 2
+  GROUP BY g.pk
+) as single_pin_spares ON single_pin_spares.pk = g.pk
+LEFT JOIN (
+  SELECT
+    g.pk,
+    count(*) as _cnt
+  FROM game g
+  INNER JOIN frame f on f.gameFk = g.pk
+  WHERE f.scores & 15 = 9
+    AND f.flags & 1
+    AND f.flags & 2
+    AND f.scores >> 4 = 10
+  GROUP BY g.pk
+) as picked_up_single_pin_spares ON picked_up_single_pin_spares.pk = g.pk
+LEFT JOIN (
+  SELECT
+    g.pk,
+    count(*) as _cnt
+  FROM game g
+  INNER JOIN frame f on f.gameFk = g.pk
+  WHERE f.pins >> 6 > 0 and f.pins & 0x3F = 0
+  GROUP BY g.pk
+) as pocket_hits_no_strike ON pocket_hits_no_strike.pk = g.pk
+LEFT JOIN (
+  SELECT
+    g.pk,
+    count(*) as _cnt
+  FROM game g
+  INNER JOIN frame f on f.gameFk = g.pk
+  WHERE f.flags & 1
+    AND f.scores & 15 = 0 and f.frameNum < 11
+  GROUP BY g.pk
+) as gutters ON gutters.pk = g.pk
+WHERE g.pk IN (${placeholders})`;
+
     const statement = this.sqlDB.prepare(query);
-    const statResult = statement.getAsObject(games.map((g: Game) => g.pk));
+    const result = statement.getAsObject(params);
     statement.free();
+
+    const strikeCount = (result['strike_count'] as number) || 0;
+    const allFrameCount = (result['all_frame_count'] as number) || 0;
+    const pocketHitNoStrikeCount = (result['pocket_hit_no_strike_count'] as number) || 0;
+    const openCount = (result['open_count'] as number) || 0;
+    const pickedUpSpareCount = (result['picked_up_spare_count'] as number) || 0;
+    const potentialSpareCount = (result['potential_spare_count'] as number) || 0;
+    const singlePinSparePickupCount = (result['single_pin_spare_pickup_count'] as number) || 0;
+    const singlePinSpareCount = (result['single_pin_spare_count'] as number) || 0;
+
     return {
-      average: statResult['average'] as number,
-      high: statResult['high'] as number,
-      count: statResult['count'] as number,
-      cleanCount: statResult['clean_count'] as number,
+      average: Math.round(((result['average'] as number) || 0) * 100) / 100,
+      high: (result['high'] as number) || 0,
+      count: (result['count'] as number) || 0,
+      cleanCount: (result['clean_count'] as number) || 0,
+      strikesPercent: this.calculatePercent(strikeCount, allFrameCount),
+      pocketHitsPercent: this.calculatePercent(strikeCount + pocketHitNoStrikeCount, allFrameCount),
+      opensPercent: this.calculatePercent(openCount, allFrameCount),
+      sparesPercent: this.calculatePercent(pickedUpSpareCount, potentialSpareCount),
+      singlePinPickupPercent: this.calculatePercent(singlePinSparePickupCount, singlePinSpareCount),
+      gutters: (result['gutters'] as number) || 0,
     };
   }
 
