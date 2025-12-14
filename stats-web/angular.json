@@ -24,11 +24,6 @@
               {
                 "glob": "**/*",
                 "input": "public"
-              },
-              {
-                "glob": "**/*",
-                "input": "node_modules/sql.js/dist/",
-                "output": "assets/sql-wasm/"
               }
             ],
             "styles": [

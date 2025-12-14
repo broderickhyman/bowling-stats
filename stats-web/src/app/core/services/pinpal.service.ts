@@ -28,7 +28,8 @@ export class PinpalService {
     if (!this.initPromise) {
       this.initPromise = (async () => {
         this.SQL = await window.initSqlJs!({
-          locateFile: (file: string) => `assets/sql-wasm/${file}`,
+          locateFile: (file: string) =>
+            `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.13.0/${file}`,
         });
         const file = await this.appDB.databaseFiles.get({
           title: 'main',
