@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -15,7 +16,10 @@ describe('AppNavComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppNavComponent, MatButtonModule, MatIconModule, MatListModule, MatSidenavModule, MatToolbarModule],
-      providers: [provideZonelessChangeDetection()],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+      ],
     }).compileComponents();
   });
 

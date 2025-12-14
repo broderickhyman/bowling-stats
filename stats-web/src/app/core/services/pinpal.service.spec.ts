@@ -1,17 +1,52 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import type { SqlJsStatic } from 'sql.js';
 
 import { PinpalService } from './pinpal.service';
+import { AppDB } from './db.service';
 import { Game } from './pinpal.model';
 
 describe('PinpalService', () => {
   let service: PinpalService;
 
   beforeEach(() => {
+    // Mock window.initSqlJs before TestBed configuration
+    const mockDatabase = {
+      close: vi.fn(),
+      prepare: vi.fn().mockReturnValue({
+        bind: vi.fn(),
+        step: vi.fn().mockReturnValue(false),
+        getAsObject: vi.fn(),
+        free: vi.fn(),
+      }),
+    };
+    const mockSqlJs = {
+      Database: vi.fn().mockImplementation(() => mockDatabase),
+    };
+    const mockInitSqlJs = vi.fn().mockResolvedValue(mockSqlJs);
+    (mockInitSqlJs as any).default = mockInitSqlJs;
+    window.initSqlJs = mockInitSqlJs as unknown as typeof window.initSqlJs;
+
+    // Mock AppDB service to avoid IndexedDB access
+    const mockAppDB = {
+      databaseFiles: {
+        get: vi.fn().mockResolvedValue(null),
+      },
+    };
+
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: AppDB, useValue: mockAppDB },
+      ],
     });
     service = TestBed.inject(PinpalService);
+  });
+
+  afterEach(() => {
+    // Clean up the mock
+    delete (window as any).initSqlJs;
   });
 
   it('should be created', () => {
