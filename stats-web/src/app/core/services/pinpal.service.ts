@@ -363,19 +363,18 @@ limit ?`;
     }
     const placeholders = games.map(() => '?').join(',');
     const query = `SELECT
-avg(g.score)
-, max(g.score)
-, count(g.score)
+avg(g.score) as 'average'
+, max(g.score) as 'high'
+, count(g.score) as 'count'
 from game g
 where g.pk in (${placeholders})`;
-    const statResult = this.sqlDB.exec(
-      query,
-      games.map((g: Game) => g.pk),
-    )[0].values[0];
+    const statement = this.sqlDB.prepare(query);
+    const statResult = statement.getAsObject(games.map((g: Game) => g.pk));
+    statement.free();
     return {
-      average: statResult[0] as number,
-      high: statResult[1] as number,
-      count: statResult[2] as number,
+      average: statResult['average'] as number,
+      high: statResult['high'] as number,
+      count: statResult['count'] as number,
     };
   }
 
