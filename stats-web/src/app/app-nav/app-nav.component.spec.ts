@@ -1,4 +1,5 @@
-import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -11,12 +12,12 @@ describe('AppNavComponent', () => {
   let component: AppNavComponent;
   let fixture: ComponentFixture<AppNavComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [AppNavComponent],
-      imports: [MatButtonModule, MatIconModule, MatListModule, MatSidenavModule, MatToolbarModule],
-    });
-  }));
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [AppNavComponent, MatButtonModule, MatIconModule, MatListModule, MatSidenavModule, MatToolbarModule],
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AppNavComponent);

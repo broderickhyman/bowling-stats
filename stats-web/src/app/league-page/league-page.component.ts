@@ -3,7 +3,7 @@ import { Game, LeagueOverview } from '@core/services/pinpal.model';
 import { PinpalService } from '@core/services/pinpal.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
-import { GamesOverview } from 'app/shared/components/games-overview.component';
+import { GamesOverview } from '../shared/components/games-overview.component';
 import { DatePipe } from '@angular/common';
 
 @Component({

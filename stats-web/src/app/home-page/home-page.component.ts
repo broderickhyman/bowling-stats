@@ -4,7 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { Game } from '@core/services/pinpal.model';
 import { PinpalService } from '@core/services/pinpal.service';
 import { RouterLink } from '@angular/router';
-import { GamesOverview } from 'app/shared/components/games-overview.component';
+import { GamesOverview } from '../shared/components/games-overview.component';
 
 @Component({
   selector: 'home-page',

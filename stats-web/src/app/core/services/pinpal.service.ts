@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import type { Database, SqlJsStatic } from 'sql.js';
 import { AppDB } from './db.service';
 import { Game, LeagueOverview, Week, BallStats, MonthlyStats } from './pinpal.model';
-import { Stats } from 'app/shared/components/stats.model';
+import { Stats } from '../../shared/components/stats.model';
 import { GameQueryOptions, LeagueQueryOptions } from './pinpal-query.model';
 
 // Declare global initSqlJs function loaded from script

@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { PinpalService } from './pinpal.service';
 import { Game } from './pinpal.model';
@@ -7,7 +8,9 @@ describe('PinpalService', () => {
   let service: PinpalService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+    });
     service = TestBed.inject(PinpalService);
   });
 
