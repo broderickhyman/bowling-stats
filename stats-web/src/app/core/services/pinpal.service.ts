@@ -359,6 +359,7 @@ limit ?`;
         average: 0,
         high: 0,
         count: 0,
+        cleanCount: 0,
       };
     }
     const placeholders = games.map(() => '?').join(',');
@@ -366,6 +367,7 @@ limit ?`;
 avg(g.score) as 'average'
 , max(g.score) as 'high'
 , count(g.score) as 'count'
+, sum(g.flags & 4 == 4) as 'clean_count'
 from game g
 where g.pk in (${placeholders})`;
     const statement = this.sqlDB.prepare(query);
@@ -375,6 +377,7 @@ where g.pk in (${placeholders})`;
       average: statResult['average'] as number,
       high: statResult['high'] as number,
       count: statResult['count'] as number,
+      cleanCount: statResult['clean_count'] as number,
     };
   }
 
