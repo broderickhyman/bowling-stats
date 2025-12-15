@@ -5,6 +5,7 @@ import { MatSortModule, Sort } from '@angular/material/sort';
 import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import { PinpalService } from '@core/services/pinpal.service';
+import { PageTitleService } from '@core/services/page-title.service';
 import { MonthlyStats } from '@core/services/pinpal.model';
 
 @Component({
@@ -17,6 +18,7 @@ import { MonthlyStats } from '@core/services/pinpal.model';
 export class MonthlyPage {
   private router = inject(Router);
   private pinpalService = inject(PinpalService);
+  private pageTitleService = inject(PageTitleService);
 
   monthlyStats = signal<MonthlyStats[]>([]);
   sortedStats = signal<MonthlyStats[]>([]);
@@ -83,6 +85,10 @@ export class MonthlyPage {
       },
     },
   };
+
+  constructor() {
+    this.pageTitleService.setTitle('Monthly Statistics');
+  }
 
   async ngOnInit() {
     const stats = await this.pinpalService.loadMonthlyStats();

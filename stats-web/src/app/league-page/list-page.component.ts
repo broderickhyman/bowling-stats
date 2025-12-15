@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { LeagueOverview } from '@core/services/pinpal.model';
 import { PinpalService } from '@core/services/pinpal.service';
+import { PageTitleService } from '@core/services/page-title.service';
 import { LeagueOverviewCard } from './overview-card.component';
 import { Router } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -14,8 +15,13 @@ import { MatTabsModule } from '@angular/material/tabs';
 export class LeagueListPage {
   router = inject(Router);
   public pinpalService = inject(PinpalService);
+  private pageTitleService = inject(PageTitleService);
   leagues = signal<LeagueOverview[]>([]);
   tournaments = signal<LeagueOverview[]>([]);
+
+  constructor() {
+    this.pageTitleService.setTitle('Leagues');
+  }
 
   async ngOnInit() {
     const all = await this.pinpalService.loadLeagueOverviews({});

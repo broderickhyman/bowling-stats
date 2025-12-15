@@ -8,6 +8,4 @@ import { AppNavComponent } from './app-nav/app-nav.component';
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App {
-  title = 'Bowling Stats';
-}
+export class App {}

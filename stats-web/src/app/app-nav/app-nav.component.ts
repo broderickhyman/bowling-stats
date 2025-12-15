@@ -1,4 +1,4 @@
-import { Component, inject, input, viewChild } from '@angular/core';
+import { Component, inject, viewChild } from '@angular/core';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AsyncPipe } from '@angular/common';
@@ -9,6 +9,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { Observable } from 'rxjs';
 import { filter, map, shareReplay } from 'rxjs/operators';
+import { PageTitleService } from '../core/services/page-title.service';
 
 @Component({
   selector: 'app-app-nav',
@@ -27,7 +28,7 @@ import { filter, map, shareReplay } from 'rxjs/operators';
 export class AppNavComponent {
   router = inject(Router);
   sidenav = viewChild.required<MatSidenav>('sidenav');
-  title = input('');
+  pageTitleService = inject(PageTitleService);
   private breakpointObserver = inject(BreakpointObserver);
 
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset).pipe(

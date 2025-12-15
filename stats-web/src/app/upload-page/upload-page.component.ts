@@ -1,6 +1,7 @@
 import { Component, ElementRef, ViewChild, inject, signal } from '@angular/core';
 import { MatListModule } from '@angular/material/list';
 import { PinpalService } from '@core/services/pinpal.service';
+import { PageTitleService } from '@core/services/page-title.service';
 import { Week } from '@core/services/pinpal.model';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
@@ -14,8 +15,13 @@ import { RouterLink } from '@angular/router';
 export class UploadPage {
   @ViewChild('fileUpload') fileUpload!: ElementRef;
   private pinpalService = inject(PinpalService);
+  private pageTitleService = inject(PageTitleService);
   status = signal('Loading...');
   weeks = signal<Week[]>([]);
+
+  constructor() {
+    this.pageTitleService.setTitle('Upload Database');
+  }
 
   gameScores(week: Week): string {
     return week.games.map((g) => g.score).join(', ');

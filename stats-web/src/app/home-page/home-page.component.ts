@@ -3,6 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { Game } from '@core/services/pinpal.model';
 import { PinpalService } from '@core/services/pinpal.service';
+import { PageTitleService } from '@core/services/page-title.service';
 import { RouterLink } from '@angular/router';
 import { GamesOverview } from '../shared/components/games-overview.component';
 
@@ -14,9 +15,14 @@ import { GamesOverview } from '../shared/components/games-overview.component';
 })
 export class HomePage {
   public pinpalService = inject(PinpalService);
+  private pageTitleService = inject(PageTitleService);
   loading = signal(true);
   existingData = signal(false);
   games = signal<Game[]>([]);
+
+  constructor() {
+    this.pageTitleService.setTitle('Home');
+  }
 
   async ngOnInit() {
     await this.loadData();
