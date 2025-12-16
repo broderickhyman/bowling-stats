@@ -2,15 +2,30 @@
   <!-- Chart Section -->
   <div class="chart-section">
     <div class="mat-headline-medium">Monthly Bowling Trends</div>
-    <!-- Metric Selector -->
-    <mat-form-field class="metric-selector">
-      <mat-label>Select Metric</mat-label>
-      <mat-select [value]="selectedMetric()" (selectionChange)="onMetricChange($event.value)">
-        @for (option of metricOptions; track option.value) {
-          <mat-option [value]="option.value">{{ option.label }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
+    <!-- Controls Container -->
+    <div class="controls-container">
+      <!-- Metric Selector -->
+      <mat-form-field class="metric-selector">
+        <mat-label>Select Metric</mat-label>
+        <mat-select [value]="selectedMetric()" (selectionChange)="onMetricChange($event.value)">
+          @for (option of metricOptions; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <!-- Months Filter -->
+      <mat-form-field class="months-selector">
+        <mat-label>Number of Months</mat-label>
+        <input
+          matInput
+          type="number"
+          [value]="monthsToDisplay()"
+          (change)="onMonthsChange($event)"
+          min="1"
+          [max]="monthlyStats().length"
+        />
+      </mat-form-field>
+    </div>
     <div class="chart-container">
       <canvas
         baseChart

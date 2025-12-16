@@ -5,14 +5,25 @@
 .chart-section {
   margin-bottom: 32px;
 
-  .metric-selector {
+  .mat-headline-medium {
     margin-bottom: 16px;
+  }
+
+  .controls-container {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .metric-selector {
     min-width: 200px;
     max-width: 300px;
   }
 
-  .mat-headline-medium {
-    margin-bottom: 16px;
+  .months-selector {
+    min-width: 150px;
+    max-width: 200px;
   }
 }
 

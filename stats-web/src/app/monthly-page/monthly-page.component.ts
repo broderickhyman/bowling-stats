@@ -1,9 +1,10 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import { PinpalService } from '@core/services/pinpal.service';
@@ -28,7 +29,7 @@ interface MetricOption {
   selector: 'monthly-page',
   templateUrl: './monthly-page.component.html',
   styleUrl: './monthly-page.component.scss',
-  imports: [MatTableModule, MatSortModule, MatSelectModule, MatFormFieldModule, BaseChartDirective],
+  imports: [MatTableModule, MatSortModule, MatSelectModule, MatFormFieldModule, MatInputModule, BaseChartDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MonthlyPage {
@@ -39,6 +40,16 @@ export class MonthlyPage {
   monthlyStats = signal<MonthlyStats[]>([]);
   sortedStats = signal<MonthlyStats[]>([]);
   selectedMetric = signal<MetricKey>('averageScore');
+  monthsToDisplay = signal<number>(12);
+  private lastSort = signal<Sort | null>(null);
+
+  filteredStats = computed(() => {
+    const stats = this.monthlyStats();
+    const limit = this.monthsToDisplay();
+    if (stats.length === 0) return [];
+    // Take most recent N months
+    return stats.slice(0, limit);
+  });
 
   readonly metricOptions: MetricOption[] = [
     { value: 'averageScore', label: 'Average Score', yAxisLabel: 'Average Score' },
@@ -125,14 +136,17 @@ export class MonthlyPage {
     }
 
     this.monthlyStats.set(stats);
-    this.sortedStats.set(stats);
+    this.sortedStats.set(this.filteredStats());
 
     // Populate chart with default metric
     this.populateChartData(this.selectedMetric());
   }
 
   onSortChange(sort: Sort) {
-    const data = this.monthlyStats().slice();
+    // Remember the sort state
+    this.lastSort.set(sort.active && sort.direction ? sort : null);
+
+    const data = this.filteredStats().slice();
 
     if (!sort.active || sort.direction === '') {
       this.sortedStats.set(data);
@@ -174,7 +188,7 @@ export class MonthlyPage {
   }
 
   private populateChartData(metric: MetricKey): void {
-    const stats = this.monthlyStats();
+    const stats = this.filteredStats();
     if (stats.length === 0) return;
 
     const reversedStats = [...stats].reverse();
@@ -213,5 +227,34 @@ export class MonthlyPage {
   onMetricChange(metric: MetricKey): void {
     this.selectedMetric.set(metric);
     this.populateChartData(metric);
+  }
+
+  onMonthsChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let value = parseInt(input.value, 10);
+
+    // Validation
+    if (isNaN(value) || value < 1) {
+      value = 1;
+      input.value = '1';
+    }
+
+    const maxMonths = this.monthlyStats().length;
+    if (value > maxMonths) {
+      value = maxMonths;
+      input.value = maxMonths.toString();
+    }
+
+    this.monthsToDisplay.set(value);
+
+    // Reapply the last sort to the new filtered data
+    const lastSort = this.lastSort();
+    if (lastSort && lastSort.active && lastSort.direction) {
+      this.onSortChange(lastSort);
+    } else {
+      this.sortedStats.set(this.filteredStats());
+    }
+
+    this.populateChartData(this.selectedMetric());
   }
 }
