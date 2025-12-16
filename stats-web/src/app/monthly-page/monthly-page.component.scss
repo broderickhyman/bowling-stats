@@ -5,6 +5,12 @@
 .chart-section {
   margin-bottom: 32px;
 
+  .metric-selector {
+    margin-bottom: 16px;
+    min-width: 200px;
+    max-width: 300px;
+  }
+
   .mat-headline-medium {
     margin-bottom: 16px;
   }

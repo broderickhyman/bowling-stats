@@ -264,7 +264,6 @@ LEFT JOIN (
     AND f.scores & 15 = 0 and f.frameNum < 11
   GROUP BY g.weekFk
 ) as gutters on gutters.weekFk = w.pk
-WHERE DATETIME(w.date, 'unixepoch') > '2021-01-01'
 GROUP BY STRFTIME('%Y-%m', DATETIME(w.date, 'unixepoch'))
 ORDER BY w.date DESC`;
 
