@@ -1,7 +1,16 @@
 @if (loading()) {
   <div class="mat-headline-medium">Checking for existing data</div>
 } @else if (existingData()) {
-  <div class="mat-title-medium">Last {{ games().length }} league games</div>
+  <mat-form-field class="games-limit-selector">
+    <mat-label>Number of Recent Games</mat-label>
+    <input
+      matInput
+      type="number"
+      [value]="gamesLimit()"
+      (change)="onGamesLimitChange($event)"
+      min="1"
+    />
+  </mat-form-field>
   <games-overview [games]="games()" />
 } @else {
   <div class="mat-headline-medium">No Data Found</div>

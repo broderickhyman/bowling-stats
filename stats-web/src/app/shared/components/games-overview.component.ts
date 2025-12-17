@@ -1,4 +1,4 @@
-import { Component, inject, input, signal } from '@angular/core';
+import { Component, effect, inject, input, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { Game } from '@core/services/pinpal.model';
@@ -20,7 +20,7 @@ export class GamesOverview {
   public pinpalService = inject(PinpalService);
   router = inject(Router);
   stats = signal<Stats | null>(null);
-  chartData: ChartConfiguration['data'] = {
+  chartData = signal<ChartConfiguration['data']>({
     datasets: [
       {
         data: [],
@@ -30,7 +30,7 @@ export class GamesOverview {
         backgroundColor: 'green',
       },
     ],
-  };
+  });
   chartOptions: ChartConfiguration['options'] = {
     scales: {
       y: {
@@ -48,11 +48,25 @@ export class GamesOverview {
     },
   };
 
-  async ngOnInit() {
-    const games = this.games();
-    this.chartData.datasets[0].data = games.map((g: Game) => g.score);
-    this.chartData.labels = games.map((g: Game) => g.week!.date.toLocaleDateString());
+  constructor() {
+    effect(async () => {
+      const games = this.games();
 
-    this.stats.set(await this.pinpalService.loadGameStats(games));
+      // Update chart data
+      this.chartData.set({
+        labels: games.map((g: Game) => g.week!.date.toLocaleDateString()),
+        datasets: [
+          {
+            data: games.map((g: Game) => g.score),
+            tension: 0.4,
+            borderColor: 'green',
+            backgroundColor: 'green',
+          },
+        ],
+      });
+
+      // Update stats
+      this.stats.set(await this.pinpalService.loadGameStats(games));
+    });
   }
 }
