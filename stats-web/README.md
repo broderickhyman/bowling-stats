@@ -73,23 +73,29 @@ npm run test-watch
 ```
 src/
 ├── app/
-│   ├── core/              # Services and guards
-│   │   ├── services/      # Business logic services
-│   │   │   ├── pinpal.service.ts       # PinPal database querying
-│   │   │   ├── db.service.ts           # IndexedDB wrapper (Dexie)
-│   │   │   └── page-title.service.ts   # Page title management
-│   │   └── guards/
-│   ├── shared/            # Shared components and pipes
-│   ├── features/          # Feature modules
-│   │   ├── dashboard/     # Statistics dashboard
-│   │   ├── onboarding/    # Data import flow
-│   │   ├── leagues/       # League detail views
-│   │   ├── balls/         # Ball statistics
-│   │   └── monthly/       # Monthly aggregated statistics
-│   ├── models/            # TypeScript interfaces
-│   └── routes/
+│   ├── app-nav/           # Navigation component
+│   ├── core/              # Core services
+│   │   └── services/
+│   │       ├── pinpal.service.ts         # PinPal database querying
+│   │       ├── db.service.ts             # IndexedDB wrapper (Dexie)
+│   │       ├── page-title.service.ts     # Page title management
+│   │       ├── pinpal.model.ts           # PinPal data models
+│   │       └── pinpal.service.spec.ts
+│   ├── shared/            # Shared components
+│   │   └── components/
+│   │       ├── stat-card.component.*      # Statistics card component
+│   │       ├── games-overview.component.* # Games display component
+│   │       └── pin-card.component.*       # Pin statistics component
+│   ├── home-page/         # Home/dashboard page
+│   ├── league-page/       # League detail and list pages
+│   ├── balls-page/        # Ball statistics page
+│   ├── monthly-page/      # Monthly statistics page
+│   ├── upload-page/       # Database import page
+│   ├── app.routes.ts      # Route configuration
+│   ├── app.config.ts      # App configuration
+│   └── app.html           # Root template
 ├── assets/                # Static assets
-└── styles/                # Global styles and theming
+└── styles.scss            # Global styles
 ```
 
 ## Architecture
@@ -103,6 +109,7 @@ src/
 - Provides methods to query leagues, games, ball statistics, and monthly statistics
 - Implements complex SQL queries with CTEs for aggregating bowling metrics
 - Calculates pin leave types (splits, single pins, regular leaves) on initialization
+- Models: `PinpalModel` and `PinpalQueryModel` define the data structures
 
 **AppDB** (`src/app/core/services/db.service.ts`)
 - Dexie wrapper for IndexedDB storage
@@ -110,7 +117,7 @@ src/
 - Provides single table: `databaseFiles` indexed by `title`
 
 **Import Process**
-- User uploads PinPal backup file via upload page
+- User uploads PinPal backup file via upload-page
 - `PinpalService.importDatabase()` extracts SQLite database from backup file by searching for "SQLite format 3" header
 - Stores extracted database in IndexedDB
 - Loads database into sql.js for querying
@@ -123,18 +130,18 @@ src/
 
 ### UI Components
 
-**Page Components:**
-- `HomePage` - Overview of recent bowling activity
-- `UploadPage` - Database file upload interface
-- `LeagueListPage` - List all bowling leagues
-- `LeaguePage` - Detailed league statistics (route: `/league/:id`)
-- `BallsPage` - Statistics by bowling ball used
-- `MonthlyPage` - Monthly aggregated statistics
+**Feature Pages** (each in its own directory):
+- `app-nav/` - Navigation component with routing
+- `home-page/` - Dashboard with recent bowling activity
+- `upload-page/` - Database file import interface
+- `league-page/` - League list and detail views
+- `balls-page/` - Statistics organized by bowling ball
+- `monthly-page/` - Monthly aggregated statistics and trends
 
-**Shared Components:**
+**Shared Components** (`shared/components/`):
 - `StatCard` - Reusable card for displaying statistics
-- `GamesOverview` - Display game scores
-- `PinCard` - Display pin-related statistics
+- `GamesOverview` - Displays game scores and details
+- `PinCard` - Displays pin-related statistics
 
 All components are standalone (Angular 20+) with `ChangeDetectionStrategy.OnPush`.
 
