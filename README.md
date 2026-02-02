@@ -1,0 +1,107 @@
+# Bowling Stats
+
+A comprehensive system for analyzing bowling performance data from PinPal exports. Import your bowling history, visualize trends, and identify areas for improvement.
+
+## Overview
+
+This repository contains a complete solution for tracking and analyzing bowling statistics:
+
+- **Web Application** - Angular app for visualizing bowling data with interactive dashboards
+- **Parser Tool** - Command-line utility for extracting SQLite databases from PinPal backups
+- **SQL Queries** - Collection of queries for offline analysis and exploration
+
+All data is processed locally in your browser for privacy. No data is sent to external servers.
+
+## Quick Start
+
+The easiest way to get started is with the web application:
+
+1. **Install Dependencies**: `npm install` (from the `stats-web` directory)
+2. **Start Development Server**: `npm start`
+3. **Upload Your Data**: Export your bowling data from PinPal and import it through the app
+4. **View Your Stats**: Explore your bowling statistics and trends
+
+For detailed setup instructions, see [stats-web/README.md](./stats-web/README.md).
+
+## Repository Structure
+
+### [stats-web](./stats-web) - Web Application
+The main user interface for visualizing bowling statistics. Built with Angular, Material Design, and Chart.js.
+
+**Key Features:**
+- Interactive dashboards and charts
+- League, monthly, and ball statistics
+- Real-time data visualization
+- Local data storage (IndexedDB)
+
+**Get Started:** `cd stats-web && npm install && npm start`
+
+See [stats-web/README.md](./stats-web/README.md) for full documentation.
+
+### [parser](./parser) - BackupParser Tool
+A .NET command-line tool for extracting SQLite databases from PinPal backup files. Useful if you prefer command-line processing or need to extract the database separately.
+
+**Usage:** `dotnet run -- --path backup.pinpal`
+
+See [parser/README.md](./parser/README.md) for full documentation.
+
+### [sql](./sql) - Analysis Queries
+A collection of SQL queries for analyzing bowling statistics directly from the PinPal SQLite database. Useful for offline analysis or building custom reports.
+
+**Queries Include:**
+- League averages and statistics
+- Monthly performance trends
+- Game and ball analysis
+- Strike and spare conversion rates
+
+See [sql/README.md](./sql/README.md) for query documentation.
+
+## Technology Stack
+
+- **Frontend**: Angular 20+ with TypeScript, Angular Material, ng2-charts
+- **Database**: SQLite (from PinPal), sql.js (browser processing)
+- **Storage**: IndexedDB with Dexie.js
+- **Parser**: .NET / C#
+- **Analysis**: SQL queries
+
+## Data Source
+
+This project works with data exported from [PinPal](https://www.pinpal.app/), a mobile bowling tracking application. The web app and parser extract and visualize the underlying SQLite database.
+
+## Key Concepts
+
+### How It Works
+
+1. Export your bowling data from the PinPal app (Settings > Export Database)
+2. The `.pinpal` backup file contains an embedded SQLite database
+3. Upload the backup file to the web app (or use the parser tool)
+4. The app extracts the database and stores it locally in your browser
+5. Query and visualize your bowling statistics
+
+### Privacy
+
+- No data is stored on any external server
+- All processing happens locally in your browser
+- IndexedDB stores the database locally on your device
+- Your bowling statistics never leave your computer
+
+## Project Highlights
+
+- **Zoneless Change Detection** - Improved performance with Angular signals
+- **Material Design** - Polished, accessible UI with Angular Material
+- **Advanced SQL** - Complex queries with CTEs for aggregating bowling metrics
+- **Offline First** - Works completely offline after initial import
+
+## Getting Help
+
+- Check the project-specific README files for detailed documentation
+- Review the [CLAUDE.md](./stats-web/.claude/CLAUDE.md) file for development guidelines
+- Explore the [sql queries](./sql) for understanding the data structure
+
+## License
+
+See [LICENSE](./LICENSE) for details.
+
+---
+
+**Ready to explore your bowling stats?** Start with the [stats-web README](./stats-web/README.md)!
