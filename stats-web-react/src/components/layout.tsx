@@ -8,6 +8,7 @@ import {
   BarChartIcon,
   Chart01Icon,
 } from "@hugeicons/core-free-icons"
+import { ThemeToggle } from "./theme-toggle"
 
 const navItems = [
   { to: "/",        label: "Home",    icon: Home01Icon },
@@ -21,7 +22,7 @@ export function RootLayout() {
   return (
     <div className="flex min-h-screen flex-col">
       <nav className="border-b border-border bg-background">
-        <div className="mx-auto flex h-14 max-w-6xl items-center px-4 sm:px-6">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
           <ul className="flex items-center gap-1">
             {navItems.map(({ to, label, icon }) => (
               <li key={to}>
@@ -42,6 +43,7 @@ export function RootLayout() {
               </li>
             ))}
           </ul>
+          <ThemeToggle />
         </div>
       </nav>
       <main className="flex-1">
