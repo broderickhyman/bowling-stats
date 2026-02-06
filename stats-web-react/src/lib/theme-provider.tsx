@@ -1,4 +1,5 @@
-import { ReactNode, createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useState } from "react"
+import type { ReactNode } from "react"
 
 type Theme = "light" | "dark" | "system"
 
@@ -15,8 +16,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return stored || "system"
   })
 
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light")
-
   useEffect(() => {
     const updateTheme = () => {
       let effectiveTheme: "light" | "dark"
@@ -28,8 +27,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       } else {
         effectiveTheme = theme
       }
-
-      setResolvedTheme(effectiveTheme)
 
       const root = document.documentElement
       root.classList.remove("light", "dark")
