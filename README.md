@@ -14,7 +14,9 @@ All data is processed locally in your browser for privacy. No data is sent to ex
 
 ## Quick Start
 
-The easiest way to get started is with the web application:
+The app is hosted and ready to use at **[https://bowling-stats.broderickhyman.com/](https://bowling-stats.broderickhyman.com/)** — just visit the link and start analyzing your bowling data!
+
+Alternatively, you can run it locally:
 
 1. **Install Dependencies**: `npm install` (from the `stats-web` directory)
 2. **Start Development Server**: `npm start`
@@ -84,13 +86,6 @@ This project works with data exported from [PinPal](https://www.pinpal.app/), a 
 - All processing happens locally in your browser
 - IndexedDB stores the database locally on your device
 - Your bowling statistics never leave your computer
-
-## Project Highlights
-
-- **Zoneless Change Detection** - Improved performance with Angular signals
-- **Material Design** - Polished, accessible UI with Angular Material
-- **Advanced SQL** - Complex queries with CTEs for aggregating bowling metrics
-- **Offline First** - Works completely offline after initial import
 
 ## Getting Help
 
