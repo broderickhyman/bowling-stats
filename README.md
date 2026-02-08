@@ -1,6 +1,6 @@
 # Bowling Stats
 
-A comprehensive system for analyzing bowling performance data from PinPal exports. Import your bowling history, visualize trends, and identify areas for improvement.
+A system for analyzing bowling performance data from PinPal exports. Import your bowling history, visualize trends, and identify areas for improvement.
 
 ## Overview
 
