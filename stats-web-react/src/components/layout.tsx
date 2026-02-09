@@ -1,22 +1,22 @@
-import { NavLink, Outlet } from "react-router"
-import { cn } from "@/lib/utils"
-import { HugeiconsIcon } from "@hugeicons/react"
+import { NavLink, Outlet } from "react-router";
+import { cn } from "@/lib/utils";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Home01Icon,
   CloudUploadIcon,
   Group01Icon,
   BarChartIcon,
   Chart01Icon,
-} from "@hugeicons/core-free-icons"
-import { ThemeToggle } from "./theme-toggle"
+} from "@hugeicons/core-free-icons";
+import { ThemeToggle } from "./theme-toggle";
 
 const navItems = [
-  { to: "/",        label: "Home",    icon: Home01Icon },
-  { to: "/upload",  label: "Upload",  icon: CloudUploadIcon },
+  { to: "/", label: "Home", icon: Home01Icon },
   { to: "/leagues", label: "Leagues", icon: Group01Icon },
-  { to: "/balls",   label: "Balls",   icon: BarChartIcon },
+  { to: "/balls", label: "Balls", icon: BarChartIcon },
   { to: "/monthly", label: "Monthly", icon: Chart01Icon },
-] as const
+  { to: "/upload", label: "Upload", icon: CloudUploadIcon },
+] as const;
 
 export function RootLayout() {
   return (
@@ -33,11 +33,15 @@ export function RootLayout() {
                     cn(
                       "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
                       "text-muted-foreground hover:text-foreground hover:bg-muted",
-                      isActive && "bg-muted text-foreground"
+                      isActive && "bg-muted text-foreground",
                     )
                   }
                 >
-                  <HugeiconsIcon icon={icon} strokeWidth={2} className="size-4" />
+                  <HugeiconsIcon
+                    icon={icon}
+                    strokeWidth={2}
+                    className="size-4"
+                  />
                   {label}
                 </NavLink>
               </li>
@@ -50,7 +54,7 @@ export function RootLayout() {
         <Outlet />
       </main>
     </div>
-  )
+  );
 }
 
-export default RootLayout
+export default RootLayout;

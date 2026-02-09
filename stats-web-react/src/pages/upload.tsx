@@ -1,18 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
-import { NavLink } from 'react-router';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { usePinpalService } from '@/contexts/pinpal-service-context';
-import type { Week } from '@/services/pinpal.model';
+import { useEffect, useRef, useState } from "react";
+import { NavLink } from "react-router";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { usePinpalService } from "@/contexts/pinpal-service-context";
+import type { Week } from "@/services/pinpal.model";
 
 export function UploadPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [status, setStatus] = useState('Loading...');
+  const [status, setStatus] = useState("Loading...");
   const [weeks, setWeeks] = useState<Week[]>([]);
   const pinpalService = usePinpalService();
 
   const gameScores = (week: Week): string => {
-    return week.games.map((g) => g.score).join(', ');
+    return week.games.map((g) => g.score).join(", ");
   };
 
   const loadData = async () => {
@@ -36,11 +36,11 @@ export function UploadPage() {
 
     try {
       await pinpalService.importDatabase(file);
-      setStatus('Imported database');
+      setStatus("Imported database");
       await loadData();
     } catch (error) {
-      console.error('Import failed:', error);
-      alert('Failed to import PinPal database');
+      console.error("Import failed:", error);
+      alert("Failed to import PinPal database");
     }
   };
 
@@ -72,7 +72,7 @@ export function UploadPage() {
           <div className="mb-6">
             <NavLink to="/">
               {({ isActive }) => (
-                <Button variant={isActive ? 'default' : 'outline'}>Home</Button>
+                <Button variant={isActive ? "default" : "outline"}>Home</Button>
               )}
             </NavLink>
           </div>
@@ -81,8 +81,10 @@ export function UploadPage() {
           <div className="space-y-2">
             {weeks.map((week) => (
               <Card key={week.date.toISOString()}>
+                <CardHeader className="border-b">
+                  {week.date.toLocaleDateString()}
+                </CardHeader>
                 <CardContent className="pt-4">
-                  <div className="font-medium">{week.date.toLocaleDateString()}</div>
                   <div className="text-sm text-muted-foreground mt-1">
                     {gameScores(week)}
                   </div>
@@ -96,4 +98,4 @@ export function UploadPage() {
   );
 }
 
-export default UploadPage
+export default UploadPage;
