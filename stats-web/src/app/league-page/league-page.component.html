@@ -1,8 +1,0 @@
-@if (overview()) {
-  <div class="name">{{ overview()!.name }}</div>
-  <div class="date">Start: {{ overview()!.start | date: 'shortDate' }}</div>
-  <div class="date">End: {{ overview!()!.end | date: 'shortDate' }}</div>
-}
-@if (games().length > 0) {
-  <games-overview [games]="games()" />
-}

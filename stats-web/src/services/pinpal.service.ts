@@ -1,24 +1,42 @@
-import { Injectable, inject } from '@angular/core';
 import type { Database, SqlJsStatic } from 'sql.js';
-import { AppDB } from './db.service';
-import { Game, LeagueOverview, Week, BallStats, MonthlyStats } from './pinpal.model';
-import { Stats } from '../../shared/components/stats.model';
-import { GameQueryOptions, LeagueQueryOptions } from './pinpal-query.model';
+import { appDB } from './db';
+import type {
+  Game,
+  LeagueOverview,
+  Week,
+  BallStats,
+  MonthlyStats,
+} from './pinpal.model';
+import type {
+  GameQueryOptions,
+  LeagueQueryOptions,
+} from './pinpal-query.model';
+
+export interface Stats {
+  average: number;
+  high: number;
+  count: number;
+  cleanCount: number;
+  strikesPercent: number;
+  pocketHitsPercent: number;
+  opensPercent: number;
+  sparesPercent: number;
+  singlePinPickupPercent: number;
+  gutters: number;
+}
 
 // Declare global initSqlJs function loaded from script
 declare global {
   interface Window {
-    initSqlJs?: (config?: { locateFile: (file: string) => string }) => Promise<SqlJsStatic>;
+    initSqlJs?: (config?: {
+      locateFile: (file: string) => string;
+    }) => Promise<SqlJsStatic>;
   }
 }
 
-@Injectable({
-  providedIn: 'root',
-})
 export class PinpalService {
   private SQL: SqlJsStatic | undefined;
   private initPromise: Promise<void> | null = null;
-  private appDB = inject(AppDB);
   public sqlDB: Database | undefined;
   public loaded = false;
   public status = '';
@@ -31,7 +49,7 @@ export class PinpalService {
           locateFile: (file: string) =>
             `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.13.0/${file}`,
         });
-        const file = await this.appDB.databaseFiles.get({
+        const file = await appDB.databaseFiles.get({
           title: 'main',
         });
         if (file) {
@@ -233,16 +251,7 @@ INNER JOIN (
     AND f.flags & 2
   GROUP BY g.weekFk
 ) as singlePinSpares on singlePinSpares.weekFk = w.pk
-INNER JOIN (
-  SELECT
-    g.weekFk,
-    count(*) as _cnt
-  FROM game g
-  INNER JOIN frame f on f.gameFk = g.pk
-  WHERE f.pins >> 6 > 0 and f.pins & 0x3F = 0
-  GROUP BY g.weekFk
-) as pocketHitsNoStrike on pocketHitsNoStrike.weekFk = w.pk
-INNER JOIN (
+LEFT JOIN (
   SELECT
     g.weekFk,
     count(*) as _cnt
@@ -254,6 +263,15 @@ INNER JOIN (
     AND f.scores >> 4 = 10
   GROUP BY g.weekFk
 ) as pickedUpsinglePinSpares on pickedUpsinglePinSpares.weekFk = w.pk
+LEFT JOIN (
+  SELECT
+    g.weekFk,
+    count(*) as _cnt
+  FROM game g
+  INNER JOIN frame f on f.gameFk = g.pk
+  WHERE f.pins >> 6 > 0 and f.pins & 0x3F = 0
+  GROUP BY g.weekFk
+) as pocketHitsNoStrike on pocketHitsNoStrike.weekFk = w.pk
 LEFT JOIN (
   SELECT
     g.weekFk,
@@ -279,7 +297,9 @@ ORDER BY w.date DESC`;
       const openCount = data['openCount'] as number;
       const pickedUpSpareCount = data['pickedUpSpareCount'] as number;
       const potentialSpareCount = data['potentialSpareCount'] as number;
-      const singlePinSparePickupCount = data['singlePinSparePickupCount'] as number;
+      const singlePinSparePickupCount = data[
+        'singlePinSparePickupCount'
+      ] as number;
       const singlePinSpareCount = data['singlePinSpareCount'] as number;
 
       monthlyStats.push({
@@ -291,7 +311,10 @@ ORDER BY w.date DESC`;
           allFrameCount,
         ),
         opensPercent: this.calculatePercent(openCount, allFrameCount),
-        sparesPercent: this.calculatePercent(pickedUpSpareCount, potentialSpareCount),
+        sparesPercent: this.calculatePercent(
+          pickedUpSpareCount,
+          potentialSpareCount,
+        ),
         singlePinPickupPercent: this.calculatePercent(
           singlePinSparePickupCount,
           singlePinSpareCount,
@@ -496,12 +519,16 @@ WHERE g.pk IN (${placeholders})`;
 
     const strikeCount = (result['strike_count'] as number) || 0;
     const allFrameCount = (result['all_frame_count'] as number) || 0;
-    const pocketHitNoStrikeCount = (result['pocket_hit_no_strike_count'] as number) || 0;
+    const pocketHitNoStrikeCount =
+      (result['pocket_hit_no_strike_count'] as number) || 0;
     const openCount = (result['open_count'] as number) || 0;
     const pickedUpSpareCount = (result['picked_up_spare_count'] as number) || 0;
-    const potentialSpareCount = (result['potential_spare_count'] as number) || 0;
-    const singlePinSparePickupCount = (result['single_pin_spare_pickup_count'] as number) || 0;
-    const singlePinSpareCount = (result['single_pin_spare_count'] as number) || 0;
+    const potentialSpareCount =
+      (result['potential_spare_count'] as number) || 0;
+    const singlePinSparePickupCount =
+      (result['single_pin_spare_pickup_count'] as number) || 0;
+    const singlePinSpareCount =
+      (result['single_pin_spare_count'] as number) || 0;
 
     return {
       average: Math.round(((result['average'] as number) || 0) * 100) / 100,
@@ -509,10 +536,19 @@ WHERE g.pk IN (${placeholders})`;
       count: (result['count'] as number) || 0,
       cleanCount: (result['clean_count'] as number) || 0,
       strikesPercent: this.calculatePercent(strikeCount, allFrameCount),
-      pocketHitsPercent: this.calculatePercent(strikeCount + pocketHitNoStrikeCount, allFrameCount),
+      pocketHitsPercent: this.calculatePercent(
+        strikeCount + pocketHitNoStrikeCount,
+        allFrameCount,
+      ),
       opensPercent: this.calculatePercent(openCount, allFrameCount),
-      sparesPercent: this.calculatePercent(pickedUpSpareCount, potentialSpareCount),
-      singlePinPickupPercent: this.calculatePercent(singlePinSparePickupCount, singlePinSpareCount),
+      sparesPercent: this.calculatePercent(
+        pickedUpSpareCount,
+        potentialSpareCount,
+      ),
+      singlePinPickupPercent: this.calculatePercent(
+        singlePinSparePickupCount,
+        singlePinSpareCount,
+      ),
       gutters: (result['gutters'] as number) || 0,
     };
   }
@@ -577,7 +613,7 @@ w.date desc
       throw new Error('Could not find the SQLite start');
     }
     const sqliteData = rawData.subarray(startPosition + 1);
-    this.appDB.databaseFiles.put({
+    appDB.databaseFiles.put({
       title: 'main',
       data: sqliteData,
     });
@@ -641,7 +677,9 @@ w.date desc
       }
       // Starting at 1 to skip the head pin
       let bitOffset = 1;
-      const standingPins = pinComboNumber.toString(2).replaceAll('0', '').length;
+      const standingPins = pinComboNumber
+        .toString(2)
+        .replaceAll('0', '').length;
       while (bitOffset < 10) {
         const pinValue = (pinComboNumber >> bitOffset) & 1;
         if (pinValue == 0) {
@@ -674,8 +712,6 @@ w.date desc
         break;
       }
     }
-
-    // console.log(this.splits.length);
   }
 }
 
