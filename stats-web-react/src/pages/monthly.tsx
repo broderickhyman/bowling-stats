@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PinpalService } from '@/services/pinpal.service';
+import { usePinpalService } from '@/contexts/pinpal-service-context';
 import type { MonthlyStats } from '@/services/pinpal.model';
 
 type MetricKey = 'averageScore' | 'strikesPercent' | 'pocketHitsPercent' | 'opensPercent' | 'sparesPercent' | 'singlePinPickupPercent';
@@ -37,7 +37,7 @@ export function MonthlyPage() {
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'date', direction: 'desc' });
   const [selectedMetrics, setSelectedMetrics] = useState<MetricKey[]>(['averageScore', 'strikesPercent', 'pocketHitsPercent']);
   const navigate = useNavigate();
-  const pinpalService = useRef(new PinpalService()).current;
+  const pinpalService = usePinpalService();
 
   useEffect(() => {
     const loadData = async () => {
@@ -51,7 +51,7 @@ export function MonthlyPage() {
       setLoading(false);
     };
     loadData();
-  }, [pinpalService, navigate]);
+  }, [navigate]);
 
   const updateFilteredStats = (stats: MonthlyStats[], months: number, sort: SortConfig) => {
     let filtered = stats.slice(0, months);

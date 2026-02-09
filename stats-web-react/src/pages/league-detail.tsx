@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Badge } from '@/components/ui/badge';
-import { PinpalService } from '@/services/pinpal.service';
+import { usePinpalService } from '@/contexts/pinpal-service-context';
 import type { Game, LeagueOverview } from '@/services/pinpal.model';
 import { GamesOverview } from '@/components/games-overview';
 
@@ -11,7 +11,7 @@ export function LeagueDetailPage() {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const pinpalService = useRef(new PinpalService()).current;
+  const pinpalService = usePinpalService();
 
   useEffect(() => {
     const loadData = async () => {
@@ -50,7 +50,7 @@ export function LeagueDetailPage() {
     };
 
     loadData();
-  }, [id, pinpalService, navigate]);
+  }, [id, navigate]);
 
   if (loading) {
     return (

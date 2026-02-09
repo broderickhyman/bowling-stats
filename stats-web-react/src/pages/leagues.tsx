@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Button } from '@/components/ui/button';
-import { PinpalService } from '@/services/pinpal.service';
+import { usePinpalService } from '@/contexts/pinpal-service-context';
 import type { LeagueOverview } from '@/services/pinpal.model';
 import { LeagueOverviewCard } from '@/components/league-overview-card';
 
@@ -10,7 +10,7 @@ export function LeaguesPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'regular' | 'tournament'>('regular');
   const navigate = useNavigate();
-  const pinpalService = useRef(new PinpalService()).current;
+  const pinpalService = usePinpalService();
 
   useEffect(() => {
     const loadData = async () => {
@@ -23,7 +23,7 @@ export function LeaguesPage() {
       setLoading(false);
     };
     loadData();
-  }, [pinpalService, navigate]);
+  }, [navigate]);
 
   if (loading) {
     return (

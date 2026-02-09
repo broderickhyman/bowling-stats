@@ -2,14 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { PinpalService } from '@/services/pinpal.service';
+import { usePinpalService } from '@/contexts/pinpal-service-context';
 import type { Week } from '@/services/pinpal.model';
 
 export function UploadPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState('Loading...');
   const [weeks, setWeeks] = useState<Week[]>([]);
-  const pinpalService = useRef(new PinpalService()).current;
+  const pinpalService = usePinpalService();
 
   const gameScores = (week: Week): string => {
     return week.games.map((g) => g.score).join(', ');
@@ -26,7 +26,7 @@ export function UploadPage() {
       setStatus(pinpalService.status);
     };
     initialize();
-  }, [pinpalService]);
+  }, []);
 
   const onFileSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const input = event.target as HTMLInputElement;

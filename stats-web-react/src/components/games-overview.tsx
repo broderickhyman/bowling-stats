@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { PinpalService, type Stats } from '@/services/pinpal.service';
+import { usePinpalService } from '@/contexts/pinpal-service-context';
+import type { Stats } from '@/services/pinpal.service';
 import type { Game } from '@/services/pinpal.model';
 import { StatCard } from './stat-card';
 
@@ -10,7 +11,7 @@ interface GamesOverviewProps {
 
 export function GamesOverview({ games }: GamesOverviewProps) {
   const [stats, setStats] = useState<Stats | null>(null);
-  const pinpalService = new PinpalService();
+  const pinpalService = usePinpalService();
 
   useEffect(() => {
     const loadStats = async () => {
@@ -18,7 +19,7 @@ export function GamesOverview({ games }: GamesOverviewProps) {
       setStats(gameStats);
     };
     loadStats();
-  }, [games, pinpalService]);
+  }, [games]);
 
   const chartData = games.map((game) => ({
     date: game.week!.date.toLocaleDateString(),

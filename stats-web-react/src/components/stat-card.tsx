@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface StatCardProps {
   displayText: string;
@@ -8,11 +8,14 @@ interface StatCardProps {
 export function StatCard({ displayText, value }: StatCardProps) {
   return (
     <Card size="sm">
-      <CardHeader>
+      <CardHeader className="border-b">
         <CardTitle>{displayText}</CardTitle>
       </CardHeader>
       <CardContent className="text-right text-lg font-semibold">
-        {value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+        {value.toLocaleString("en-US", {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2,
+        })}
       </CardContent>
     </Card>
   );

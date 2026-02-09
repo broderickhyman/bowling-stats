@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { PinpalService } from '@/services/pinpal.service';
+import { usePinpalService } from '@/contexts/pinpal-service-context';
 import type { BallStats } from '@/services/pinpal.model';
 import { BallCard } from '@/components/ball-card';
 
@@ -8,7 +8,7 @@ export function BallsPage() {
   const [balls, setBalls] = useState<BallStats[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const pinpalService = useRef(new PinpalService()).current;
+  const pinpalService = usePinpalService();
 
   useEffect(() => {
     const loadData = async () => {
@@ -21,7 +21,7 @@ export function BallsPage() {
       setLoading(false);
     };
     loadData();
-  }, [pinpalService, navigate]);
+  }, [navigate]);
 
   if (loading) {
     return (

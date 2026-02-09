@@ -3,7 +3,7 @@ import { NavLink } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PinpalService } from '@/services/pinpal.service';
+import { usePinpalService } from '@/contexts/pinpal-service-context';
 import type { Game } from '@/services/pinpal.model';
 import { GamesOverview } from '@/components/games-overview';
 
@@ -21,7 +21,7 @@ export function HomePage() {
     }
     return 30;
   });
-  const pinpalService = new PinpalService();
+  const pinpalService = usePinpalService();
 
   const loadData = async (limit: number) => {
     const loadedGames = await pinpalService.loadGames({ limit });

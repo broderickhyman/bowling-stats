@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router"
 import { RouterProvider } from "react-router/dom"
 
+import { PinpalServiceProvider } from "@/contexts/pinpal-service-context"
 import { ThemeProvider } from "@/lib/theme-provider"
 import RootLayout from "@/components/layout"
 import HomePage from "@/pages/home"
@@ -27,9 +28,11 @@ const router = createBrowserRouter([
 
 export function App() {
   return (
-    <ThemeProvider>
-      <RouterProvider router={router} />
-    </ThemeProvider>
+    <PinpalServiceProvider>
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </PinpalServiceProvider>
   )
 }
 
