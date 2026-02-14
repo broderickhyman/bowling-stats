@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { NavLink } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { usePinpalService } from "@/contexts/pinpal-service-context";
@@ -10,6 +10,7 @@ export function UploadPage() {
   const [status, setStatus] = useState("Loading...");
   const [weeks, setWeeks] = useState<Week[]>([]);
   const pinpalService = usePinpalService();
+  const navigate = useNavigate();
 
   const gameScores = (week: Week): string => {
     return week.games.map((g) => g.score).join(", ");
@@ -38,6 +39,7 @@ export function UploadPage() {
       await pinpalService.importDatabase(file);
       setStatus("Imported database");
       await loadData();
+      navigate("/");
     } catch (error) {
       console.error("Import failed:", error);
       alert("Failed to import PinPal database");

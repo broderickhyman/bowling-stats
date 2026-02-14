@@ -7,11 +7,13 @@ import {
   Group01Icon,
   BarChartIcon,
   Chart01Icon,
+  InformationCircleIcon,
 } from "@hugeicons/core-free-icons";
 import { ThemeToggle } from "./theme-toggle";
 
 const navItems = [
   { to: "/", label: "Home", icon: Home01Icon },
+  { to: "/welcome", label: "Welcome", icon: InformationCircleIcon },
   { to: "/leagues", label: "Leagues", icon: Group01Icon },
   { to: "/balls", label: "Balls", icon: BarChartIcon },
   { to: "/monthly", label: "Monthly", icon: Chart01Icon },

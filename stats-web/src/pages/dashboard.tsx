@@ -1,18 +1,18 @@
-import { useEffect, useState } from 'react';
-import { NavLink } from 'react-router';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { usePinpalService } from '@/contexts/pinpal-service-context';
-import type { Game } from '@/services/pinpal.model';
-import { GamesOverview } from '@/components/games-overview';
+import { useEffect, useState } from "react";
+import { NavLink } from "react-router";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { usePinpalService } from "@/contexts/pinpal-service-context";
+import type { Game } from "@/services/pinpal.model";
+import { GamesOverview } from "@/components/games-overview";
 
-export function HomePage() {
+export function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [existingData, setExistingData] = useState(false);
   const [games, setGames] = useState<Game[]>([]);
   const [gamesLimit, setGamesLimit] = useState<number>(() => {
-    const saved = localStorage.getItem('homePageGamesLimit');
+    const saved = localStorage.getItem("homePageGamesLimit");
     if (saved) {
       const parsed = parseInt(saved, 10);
       if (!isNaN(parsed) && parsed > 0) {
@@ -44,11 +44,11 @@ export function HomePage() {
 
     if (isNaN(value) || value < 1) {
       value = 1;
-      e.target.value = '1';
+      e.target.value = "1";
     }
 
     setGamesLimit(value);
-    localStorage.setItem('homePageGamesLimit', value.toString());
+    localStorage.setItem("homePageGamesLimit", value.toString());
     loadData(value);
   };
 
@@ -80,7 +80,9 @@ export function HomePage() {
           <h1 className="text-xl font-semibold">No Data Found</h1>
           <NavLink to="/upload">
             {({ isActive }) => (
-              <Button variant={isActive ? 'default' : 'outline'}>Upload Page</Button>
+              <Button variant={isActive ? "default" : "outline"}>
+                Upload Page
+              </Button>
             )}
           </NavLink>
         </div>
@@ -89,4 +91,4 @@ export function HomePage() {
   );
 }
 
-export default HomePage
+export default DashboardPage;

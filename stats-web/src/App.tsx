@@ -4,19 +4,23 @@ import { RouterProvider } from "react-router/dom";
 import { PinpalServiceProvider } from "@/contexts/pinpal-service-context";
 import { ThemeProvider } from "@/lib/theme-provider";
 import RootLayout from "@/components/layout";
-import HomePage from "@/pages/home";
+import IndexPage, { clientLoader as indexLoader } from "@/pages/index";
+import DashboardPage from "@/pages/dashboard";
 import UploadPage from "@/pages/upload";
 import LeaguesPage from "@/pages/leagues";
 import LeagueDetailPage from "@/pages/league-detail";
 import BallsPage from "@/pages/balls";
 import MonthlyPage from "@/pages/monthly";
+import WelcomePage from "./pages/welcome";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <RootLayout />,
     children: [
-      { index: true, element: <HomePage /> },
+      { index: true, element: <IndexPage />, loader: indexLoader },
+      { path: "welcome", element: <WelcomePage /> },
+      { path: "dashboard", element: <DashboardPage /> },
       { path: "upload", element: <UploadPage /> },
       { path: "leagues", element: <LeaguesPage /> },
       { path: "league/:id", element: <LeagueDetailPage /> },
@@ -37,4 +41,3 @@ export function App() {
 }
 
 export default App;
-
