@@ -6,7 +6,7 @@ For an overview of the entire project, see the [main README](../README.md).
 
 ## Overview
 
-This Angular application allows users to upload PinPal bowling app exports and visualize their bowling statistics through interactive dashboards. All data is processed and stored locally in the browser using IndexedDB for privacy and offline access.
+This React application allows users to upload PinPal bowling app exports and visualize their bowling statistics through interactive dashboards. All data is processed and stored locally in the browser using IndexedDB for privacy and offline access.
 
 ## Features
 
@@ -19,8 +19,7 @@ This Angular application allows users to upload PinPal bowling app exports and v
 
 ## Prerequisites
 
-- Node.js 18+ and npm
-- Angular CLI 20+ (`npm install -g @angular/cli`)
+- Node.js 18+ and npm/pnpm
 
 ## Getting Started
 
@@ -31,9 +30,9 @@ This Angular application allows users to upload PinPal bowling app exports and v
 npm install
 
 # Start development server
-npm start
+npm run dev
 
-# Navigate to http://localhost:4200
+# Navigate to http://localhost:5173
 ```
 
 ### Using the App
@@ -47,62 +46,54 @@ npm start
 
 ### Available Commands
 
-- `npm start` - Start the development server on 0.0.0.0:4200 with hot reload
-- `npm run watch` - Build in watch mode with development configuration
-- `npm test` - Run all tests once (non-watch mode) using Vitest
-- `npm run test-watch` - Run tests in watch mode
+- `npm run dev` - Start the Vite development server on localhost:5173 with hot reload
 - `npm run build` - Build the project for production (output in `dist/`)
+- `npm run lint` - Run ESLint on TypeScript/TSX files
+- `npm run preview` - Preview the production build locally
 
 ### Testing
 
-This project uses [Vitest](https://vitest.dev/) as the test runner (not Karma).
-
-- Test configuration: `vitest.config.ts` and `vitest.setup.ts`
-- Tests run in jsdom environment
-
-```bash
-# Run tests once
-npm test
-
-# Run tests in watch mode
-npm run test-watch
-```
+Tests are not currently configured for this project. Testing setup can be added using Vitest or React Testing Library as needed.
 
 ## Project Structure
 
 ```
 src/
-├── app/
-│   ├── app-nav/           # Navigation component
-│   ├── core/              # Core services
-│   │   └── services/
-│   │       ├── pinpal.service.ts         # PinPal database querying
-│   │       ├── db.service.ts             # IndexedDB wrapper (Dexie)
-│   │       ├── page-title.service.ts     # Page title management
-│   │       ├── pinpal.model.ts           # PinPal data models
-│   │       └── pinpal.service.spec.ts
-│   ├── shared/            # Shared components
-│   │   └── components/
-│   │       ├── stat-card.component.*      # Statistics card component
-│   │       ├── games-overview.component.* # Games display component
-│   │       └── pin-card.component.*       # Pin statistics component
-│   ├── home-page/         # Home/dashboard page
-│   ├── league-page/       # League detail and list pages
-│   ├── balls-page/        # Ball statistics page
-│   ├── monthly-page/      # Monthly statistics page
-│   ├── upload-page/       # Database import page
-│   ├── app.routes.ts      # Route configuration
-│   ├── app.config.ts      # App configuration
-│   └── app.html           # Root template
-├── assets/                # Static assets
-└── styles.scss            # Global styles
+├── components/            # React components
+│   ├── layout.tsx         # Root layout with navigation
+│   ├── stat-card.tsx      # Statistics card component
+│   ├── games-overview.tsx # Games display component
+│   ├── league-overview-card.tsx # League summary card
+│   ├── ball-card.tsx      # Ball statistics card
+│   ├── theme-toggle.tsx   # Dark/light mode toggle
+│   └── ui/                # shadcn/ui components
+├── contexts/              # React contexts
+│   └── pinpal-service-context.tsx # PinpalService provider
+├── lib/                   # Utilities
+│   ├── theme-provider.tsx # Theme management
+│   └── utils.ts           # Helper functions
+├── pages/                 # Route pages
+│   ├── home.tsx           # Home/dashboard page
+│   ├── upload.tsx         # Database import page
+│   ├── leagues.tsx        # League list page
+│   ├── league-detail.tsx  # League detail page
+│   ├── balls.tsx          # Ball statistics page
+│   └── monthly.tsx        # Monthly statistics page
+├── services/              # Core services
+│   ├── pinpal.service.ts  # PinPal database querying
+│   ├── db.ts              # IndexedDB wrapper (Dexie)
+│   ├── pinpal.model.ts    # PinPal data models
+│   └── pinpal-query.model.ts # Query option types
+├── App.tsx                # Root component with routing
+├── main.tsx               # Application entry point
+└── index.css              # Global styles
 ```
 
 ## Architecture
 
 ### Data Layer
 
-**PinpalService** (`src/app/core/services/pinpal.service.ts`)
+**PinpalService** (`src/services/pinpal.service.ts`)
 - Core service for querying bowling statistics from SQLite databases
 - Initializes sql.js from CDN to process SQLite databases in the browser
 - Loads SQLite database from IndexedDB via AppDB service
@@ -111,52 +102,62 @@ src/
 - Calculates pin leave types (splits, single pins, regular leaves) on initialization
 - Models: `PinpalModel` and `PinpalQueryModel` define the data structures
 
-**AppDB** (`src/app/core/services/db.service.ts`)
+**AppDB** (`src/services/db.ts`)
 - Dexie wrapper for IndexedDB storage
 - Stores the raw SQLite database file (Uint8Array) in IndexedDB
 - Provides single table: `databaseFiles` indexed by `title`
 
 **Import Process**
-- User uploads PinPal backup file via upload-page
+- User uploads PinPal backup file via upload page
 - `PinpalService.importDatabase()` extracts SQLite database from backup file by searching for "SQLite format 3" header
 - Stores extracted database in IndexedDB
 - Loads database into sql.js for querying
 
 ### State Management
 
-- Uses Angular signals for reactive state (zoneless change detection enabled)
-- `computed()` for derived state
-- Service-based state management (no NgRx or similar)
+- React Context for PinpalService singleton (`usePinpalService()` hook)
+- Component-level state using React hooks (`useState`, `useEffect`)
+- No global state management library (Redux, Zustand, etc.)
 
 ### UI Components
 
-**Feature Pages** (each in its own directory):
-- `app-nav/` - Navigation component with routing
-- `home-page/` - Dashboard with recent bowling activity
-- `upload-page/` - Database file import interface
-- `league-page/` - League list and detail views
-- `balls-page/` - Statistics organized by bowling ball
-- `monthly-page/` - Monthly aggregated statistics and trends
+**Pages** (`src/pages/`):
+- `home.tsx` - Dashboard with recent bowling activity
+- `upload.tsx` - Database file import interface
+- `leagues.tsx` - League list view
+- `league-detail.tsx` - Individual league statistics and games
+- `balls.tsx` - Statistics organized by bowling ball
+- `monthly.tsx` - Monthly aggregated statistics and trends
 
-**Shared Components** (`shared/components/`):
-- `StatCard` - Reusable card for displaying statistics
-- `GamesOverview` - Displays game scores and details
-- `PinCard` - Displays pin-related statistics
-
-All components are standalone (Angular 20+) with `ChangeDetectionStrategy.OnPush`.
+**Shared Components** (`src/components/`):
+- `layout.tsx` - Root layout with navigation
+- `stat-card.tsx` - Reusable card for displaying statistics
+- `games-overview.tsx` - Displays game scores and details
+- `league-overview-card.tsx` - League summary card
+- `ball-card.tsx` - Ball statistics card
+- `theme-toggle.tsx` - Dark/light mode toggle
+- `ui/` - shadcn/ui component library (buttons, cards, charts, inputs, etc.)
 
 ### Routing
 
-Routes configured in `src/app/app.routes.ts` with eager loading (no lazy loading currently implemented).
+Routes configured in `src/App.tsx` using React Router v7 with `createBrowserRouter`:
+- `/` - Home page
+- `/upload` - Upload database
+- `/leagues` - League list
+- `/league/:id` - League detail
+- `/balls` - Ball statistics
+- `/monthly` - Monthly trends
 
 ## Technology Stack
 
-- **Angular** 20+ with TypeScript
-- **Angular Material** for UI components
+- **React** 19 with TypeScript
+- **Vite** for build tooling and development server
+- **React Router** v7 for routing
+- **Tailwind CSS** v4 for styling
+- **shadcn/ui** for UI components
+- **Recharts** for data visualization
 - **Dexie.js** for IndexedDB storage and management
 - **sql.js** for parsing and querying PinPal SQLite exports in the browser
-- **ng2-charts** for data visualization (Chart.js wrapper)
-- **Vitest** for unit testing
 
 ## Code Style and Best Practices
 
@@ -164,23 +165,21 @@ Routes configured in `src/app/app.routes.ts` with eager loading (no lazy loading
 - Strict type checking enabled
 - Prefer type inference when obvious
 - Avoid `any`; use `unknown` for uncertain types
+- Use `import type { ... }` for type-only imports
 
-### Angular
-- All components are standalone
-- Use signals for state management
-- Implement OnPush change detection
-- Use `input()` and `output()` functions instead of decorators
-- Use computed signals for derived state
-- Use native control flow (`@if`, `@for`, `@switch`) instead of `*ngIf`, `*ngFor`
-
-### Services
-- All services use `providedIn: 'root'` for singleton behavior
-- Use `inject()` function instead of constructor injection
+### React
+- Functional components with hooks
+- Use React Context for shared services (PinpalService)
+- Prefer composition over prop drilling
+- Type component props explicitly
+- Use `useState` and `useEffect` for component state and side effects
 
 ### Styling
-- SCSS for component styles
-- Global styles in `src/styles.scss`
-- Prefer Material Design system CSS variables (`--mat-sys-*`) when available
+- Tailwind CSS v4 with custom design tokens
+- Global styles in `src/index.css`
+- OKLCH color space for custom colors
+- shadcn/ui components for consistent UI
+- Path alias `@/*` maps to `src/*`
 
 ## Building
 
@@ -190,7 +189,7 @@ To build the project for production:
 npm run build
 ```
 
-Build artifacts are output to `dist/` with production optimizations including output hashing.
+Build artifacts are output to `dist/` with production optimizations. The build uses Vite for fast bundling and optimization.
 
 ## Troubleshooting
 
