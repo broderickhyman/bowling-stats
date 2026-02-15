@@ -1,9 +1,10 @@
 import { useLoaderData } from "react-router";
+import type { LoaderFunctionArgs } from "react-router";
 import { appDB } from "@/services/db";
 import WelcomePage from "./welcome";
 import DashboardPage from "./dashboard";
 
-export async function clientLoader() {
+export async function clientLoader(_: LoaderFunctionArgs) {
   try {
     const file = await appDB.databaseFiles.get({ title: "main" });
     return { hasData: !!file };
