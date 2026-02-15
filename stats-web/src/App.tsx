@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, type RouteObject } from "react-router";
 import { RouterProvider } from "react-router/dom";
 
 import { PinpalServiceProvider } from "@/contexts/pinpal-service-context";
@@ -18,7 +18,11 @@ const router = createBrowserRouter([
     path: "/",
     element: <RootLayout />,
     children: [
-      { index: true, element: <IndexPage />, loader: indexLoader },
+      {
+        index: true,
+        element: <IndexPage />,
+        clientLoader: indexLoader,
+      } as RouteObject,
       { path: "welcome", element: <WelcomePage /> },
       { path: "dashboard", element: <DashboardPage /> },
       { path: "upload", element: <UploadPage /> },
