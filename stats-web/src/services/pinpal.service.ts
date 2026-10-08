@@ -612,7 +612,7 @@ w.date desc
     if (startPosition < 0) {
       throw new Error('Could not find the SQLite start');
     }
-    const sqliteData = rawData.subarray(startPosition + 1);
+    const sqliteData = rawData.subarray(startPosition);
     appDB.databaseFiles.put({
       title: 'main',
       data: sqliteData,
@@ -633,7 +633,7 @@ w.date desc
         currentSearchIndex = 0;
       }
       if (currentSearchIndex >= searchString.length) {
-        return index - searchString.length;
+        return index + 1 - searchString.length;
       }
       index++;
       currentByte = rawData[index];
